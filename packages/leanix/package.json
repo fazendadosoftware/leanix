@@ -1,0 +1,26 @@
+{
+  "name": "@fazendadosoftware/leanix",
+  "version": "0.1.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "license": "Apache-2.0",
+  "keywords": [],
+  "devDependencies": {
+    "@types/node": "^14.11.2",
+    "@types/node-fetch": "^2.5.12",
+    "@types/tar": "^4.0.5",
+    "@typescript-eslint/eslint-plugin": "^4.29.2",
+    "@typescript-eslint/parser": "^4.29.2",
+    "gts": "^3.1.0",
+    "typescript": "^4.0.3"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "form-data": "^3.0.1",
+    "jwt-decode": "^3.1.2",
+    "node-fetch": "^2.6.1",
+    "tar": "^6.1.10"
+  }
+}
