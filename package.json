@@ -15,7 +15,7 @@
     ".eslintrc.js"
   ],
   "scripts": {
-    "clean": "rimraf \"packages/**/dist\" \"packages/**/*.tsbuildinfo\"",
+    "clean": "rimraf \"packages/**/dist\" \"packages/**/*.tsbuildinfo\" \"**/*.tgz\"",
     "compile": "tsc -b tsconfig.build.json",
     "test": "ava",
     "lint": "eslint packages/*",
