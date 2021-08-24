@@ -1,4 +1,5 @@
-console.log('Try npm run lint/fix!')
+import { getAccessToken } from '@fazendadosoftware/leanix-core'
+
 export function doSomeStuff (
   withThis: string,
   andThat: string,

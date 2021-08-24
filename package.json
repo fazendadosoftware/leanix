@@ -11,12 +11,9 @@
   "workspaces": [
     "./packages/*"
   ],
-  "files": [
-    ".eslintrc.js"
-  ],
   "scripts": {
     "clean": "rimraf \"packages/**/dist\" \"packages/**/*.tsbuildinfo\" \"**/*.tgz\"",
-    "compile": "tsc -b tsconfig.build.json",
+    "compile": "tsc",
     "test": "ava",
     "lint": "eslint packages/*",
     "fix": "eslint packages/* --fix",

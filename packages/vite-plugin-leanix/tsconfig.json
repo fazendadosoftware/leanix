@@ -4,8 +4,6 @@
     "rootDir": "lib",
     "outDir": "dist",
   },
-  "exclude": [
-    "dist",
-    "**/*.spec.ts"
-  ]
+  "exclude": [ "dist", "**/*.spec.ts"],
+  "references": [{ "path": "../leanix-core" }]
 }

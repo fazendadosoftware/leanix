@@ -1,7 +1,7 @@
 {
   "files": [],
   "references": [
-    { "path": "packages/leanix" },
+    { "path": "packages/leanix-core" },
     { "path": "packages/vite-plugin-leanix" }
   ]
 }

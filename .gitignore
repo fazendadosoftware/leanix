@@ -121,3 +121,4 @@ build
 
 .env
 tsconfig.tsbuildinfo
+dist
