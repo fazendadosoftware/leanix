@@ -10,14 +10,7 @@
   "license": "Apache-2.0",
   "keywords": ["vite-plugin", "leanix"],
   "scripts": {
-    "clean": "rimraf \"packages/**/dist\" \"packages/**/*.tsbuildinfo\" \"**/*.tgz\"",
-    "compile": "tsc",
-    "test": "ava",
-    "lint": "eslint packages/*",
-    "fix": "eslint packages/* --fix",
-    "prepare": "npm run compile",
-    "pretest": "npm run compile",
-    "posttest": "npm run lint"
+    "tsc": "tsc"
   },
   "devDependencies": {
     "gts": "^3.1.0",

@@ -13,7 +13,9 @@
   ],
   "scripts": {
     "clean": "rimraf \"packages/**/dist\" \"packages/**/*.tsbuildinfo\" \"**/*.tgz\"",
-    "compile": "tsc",
+    "tsc": "tsc",
+    "compile": "npm run tsc --workspaces",
+    "compile:core": "npm run compile -w=@fazendadosoftware/leanix-core",
     "test": "ava",
     "lint": "eslint packages/*",
     "fix": "eslint packages/* --fix",
