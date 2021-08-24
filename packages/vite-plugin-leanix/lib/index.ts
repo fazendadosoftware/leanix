@@ -1,5 +1,6 @@
 import { getAccessToken } from '@fazendadosoftware/leanix-core'
 
+console.log(getAccessToken)
 export function doSomeStuff (
   withThis: string,
   andThat: string,
