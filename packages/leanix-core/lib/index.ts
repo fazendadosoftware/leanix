@@ -5,6 +5,7 @@ import { c } from 'tar'
 import { resolve } from 'path'
 import { existsSync, writeFileSync, readdirSync, createReadStream, ReadStream, readFileSync } from 'fs'
 import { URL } from 'url'
+import { validate } from 'jsonschema'
 
 export type LeanIXHost = string
 export type LeanIXApiToken = string
@@ -21,7 +22,7 @@ export type ReportAuthor = string
 export type ReportDocumentationLink = string
 export type ReportConfig = object
 
-interface LeanIXCredentials {
+export interface LeanIXCredentials {
   host: LeanIXHost
   apitoken: LeanIXApiToken
 }
@@ -57,32 +58,23 @@ export interface CustomReportMetadata {
 
 const snakeToCamel = (s: string): string => s.replace(/([-_]\w)/g, g => g[1].toUpperCase())
 
-export const readLxrJson = (path?: string): LeanIXCredentials => {
+export const readLxrJson = async (path?: string): Promise<LeanIXCredentials> => {
   if ((path ?? '').length === 0) path = `${process.cwd()}/lxr.json`
   const { host, apitoken } = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
-  const credentials = validateCredentials(host, apitoken)
-  return credentials
-}
-
-/*
-export const readMetadataJson = (path?: string): CustomReportMetadata => {
-  if ((path ?? '').length === 0) path = `${process.cwd()}/lxrmeta.json`
-  const parsedContents = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
-  const metadata = validateReportMetadata(parsedContents)
-  return metadata
-}
-*/
-
-export const validateCredentials = (host: string | undefined, apitoken: string | undefined): LeanIXCredentials => {
-  if (host === undefined) host = ''
-  if (apitoken === undefined) apitoken = ''
   const credentials: LeanIXCredentials = { host, apitoken }
-  const validationErrors: string[] = []
-  Object.entries(credentials)
-    .forEach(([key, value]) => { if (value === undefined) validationErrors.push(`${key} is not defined`) })
-  if (validationErrors.length > 0) throw Error(`Invalid credentials: ${validationErrors.join(', ')}`)
+  const schema = await import('./schema/LeanIXCredentials.json')
+  validate(credentials, schema, { throwAll: true })
   return credentials
 }
+
+export const readMetadataJson = async (path?: string): Promise<CustomReportMetadata> => {
+  if ((path ?? '').length === 0) path = `${process.cwd()}/lxrmeta.json`
+  const parsedContent = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
+  const schema = await import('./schema/CustomReportMetadata.json')
+  validate(parsedContent, schema, { throwAll: true })
+  return parsedContent
+}
+
 export const getAccessToken = async (credentials: LeanIXCredentials): Promise<AccessToken> => {
   const uri = `https://${credentials.host}/services/mtm/v1/oauth2/token?grant_type=client_credentials`
   const headers = {
@@ -119,6 +111,7 @@ export const createBundle = async (metadata: CustomReportMetadata, outDir: strin
   if (!existsSync(outDir)) throw Error(`could not find outDir: ${outDir}`)
   writeFileSync(resolve(outDir, metaFilename), JSON.stringify(metadata))
   await c({ gzip: true, cwd: outDir, file: targetFilePath, filter: path => path !== bundleFilename }, readdirSync(outDir))
+
   const bundle = await createReadStream(targetFilePath)
   return bundle
 }

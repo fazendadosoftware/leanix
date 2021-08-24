@@ -12,7 +12,7 @@
     "./packages/*"
   ],
   "scripts": {
-    "clean": "rimraf \"packages/**/dist\" \"packages/**/*.tsbuildinfo\" \"packages/**/*.tgz\" \"packages/**/schema\"",
+    "clean": "rimraf \"packages/**/dist\" \"packages/**/*.tsbuildinfo\" \"packages/**/*.tgz\" \"**/.temp\"",
     "tsc": "tsc",
     "compile": "npm run compile --workspaces",
     "compile:core": "npm run compile -w=@fazendadosoftware/leanix-core",

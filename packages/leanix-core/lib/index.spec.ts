@@ -3,10 +3,8 @@ import { URL } from 'url'
 import { resolve } from 'path'
 import { existsSync, mkdirSync, rmdirSync, writeFileSync } from 'fs'
 import { ReadEntry, t as tarT } from 'tar'
-import { validateCredentials, getAccessToken, getLaunchUrl, createBundle, CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, uploadBundle } from './index'
+import { readLxrJson, getAccessToken, getLaunchUrl, createBundle, CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, uploadBundle } from './index'
 require('dotenv').config() // eslint-disable-line
-
-const { LEANIX_HOST: host, LEANIX_APITOKEN: apitoken } = process.env
 
 const getDummyReportMetadata = (): CustomReportMetadata => ({
   id: 'net.fazendadosoftware.testReport',
@@ -19,9 +17,8 @@ const getDummyReportMetadata = (): CustomReportMetadata => ({
   defaultConfig: {}
 })
 
-const credentials = validateCredentials(host, apitoken)
-
 test('getAccessToken returns a token', async t => {
+  const credentials = await readLxrJson()
   const accessToken = await getAccessToken(credentials)
   t.is(typeof accessToken.accessToken, 'string', 'accessToken is a string')
   t.truthy(accessToken.accessToken, 'accessToken is not an empty string')
@@ -31,7 +28,6 @@ test('getAccessToken returns a token', async t => {
   t.true(accessToken.expiresIn > 0, 'expiresIn is greater than zero')
   t.is(typeof accessToken.scope, 'string', 'scope is a string')
   t.is(accessToken.tokenType, 'bearer', 'tokenType is "bearer"')
-  console.log(accessToken.accessToken)
 })
 
 test('getLaunchUrl returns a url', async t => {
@@ -49,13 +45,16 @@ test('getLaunchUrl returns a url', async t => {
 })
 
 test('createProjectBundle returns a readable stream', async t => {
+  const outDir = resolve(__dirname, '../.temp/createProjectBundle')
+
+  if (existsSync(outDir)) rmdirSync(outDir, { recursive: true })
+  mkdirSync(outDir, { recursive: true })
+
   const projectFiles = {
     'index.js': 'console.log("hello world")',
     'index.html': '<html><body>Hello world</body></html>'
   }
 
-  const outDir = resolve(__dirname, '.temp')
-  if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true })
   Object.entries(projectFiles)
     .forEach(([filename, content]) => writeFileSync(resolve(outDir, filename), content))
 
@@ -84,7 +83,8 @@ test('createProjectBundle returns a readable stream', async t => {
 })
 
 test('uploadBundle', async t => {
-  const outDir = resolve(__dirname, '.temp')
+  const credentials = await readLxrJson()
+  const outDir = resolve(__dirname, '../.temp/uploadBundle')
   const metadata = getDummyReportMetadata()
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true })
   writeFileSync(resolve(outDir, 'index.html'), '<html><body>Hi from demo project</body></html>')

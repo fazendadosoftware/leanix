@@ -8,7 +8,7 @@ const getInlineConfig = (port: number = 6666): InlineConfig => ({
   plugins: []
 })
 
-test('plugin gets the launch url in development', async t => {
+test.only('plugin gets the launch url in development', async t => {
   t.timeout(10000, 'timeout occurred!')
   const inlineConfig = getInlineConfig()
 
@@ -30,7 +30,7 @@ test('plugin gets the launch url in development', async t => {
   await server.close()
 })
 
-test.only('plugin creates custom report bundle with build command', async t => {
+test('plugin creates custom report bundle with build command', async t => {
   t.timeout(10000, 'timeout occurred!')
   const inlineConfig = getInlineConfig()
 

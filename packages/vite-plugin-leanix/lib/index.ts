@@ -1,7 +1,7 @@
 import { Plugin, Logger, ResolvedConfig } from 'vite'
 import { AddressInfo } from 'net'
 import { resolveHostname } from './helpers'
-import { readLxrJson, getAccessToken, getLaunchUrl, CustomReportMetadata, AccessToken } from '@fazendadosoftware/leanix-core'
+import { readLxrJson, getAccessToken, getLaunchUrl, CustomReportMetadata, AccessToken, LeanIXCredentials } from '@fazendadosoftware/leanix-core'
 
 // https://github.com/nshen/vite-plugin-cesium/blob/main/src/index.ts
 
@@ -17,7 +17,6 @@ const getDummyReportMetadata = (): CustomReportMetadata => ({
 })
 
 const reportMetadata = getDummyReportMetadata()
-const credentials = readLxrJson()
 
 interface LeanIXPluginOptions {
   launchUrlCallback?: (launchUrl: string) => void
@@ -52,6 +51,13 @@ const leanixPlugin = (options: LeanIXPluginOptions = {}): LeanIXPlugin => {
       if (httpServer !== null) {
         // eslint-disable-next-line @typescript-eslint/no-misused-promises
         httpServer.on('listening', async () => {
+          let credentials: LeanIXCredentials = { host: '', apitoken: '' }
+          try {
+            credentials = await readLxrJson()
+          } catch (error) {
+            logger?.error('💥 Invalid lxr.json file, required params are "host" and "apitoken".')
+            process.exit(1)
+          }
           const options = server.config.server
           const { port } = httpServer.address() as AddressInfo
           const { name: hostname } = resolveHostname(options.host)

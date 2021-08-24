@@ -122,3 +122,4 @@ build
 .env
 tsconfig.tsbuildinfo
 dist
+.temp

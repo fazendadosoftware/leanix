@@ -10,10 +10,10 @@
   "license": "Apache-2.0",
   "keywords": [],
   "scripts": {
-    "compile": "tsc && npm run generateSchema",
+    "compile": "npm run generateSchema && tsc",
     "generateSchema": "npm run generateSchema:credentials && npm run generateSchema:metadata",
-    "generateSchema:credentials": "npx typescript-json-schema tsconfig.json LeanIXCredentials --id /LeanIXCredentials  -o schema/LeanIXCredentials.json",
-    "generateSchema:metadata": "npx typescript-json-schema tsconfig.json CustomReportMetadata --id /CustomReportMetadata  -o schema/CustomReportMetadata.json"
+    "generateSchema:credentials": "npx typescript-json-schema tsconfig.json LeanIXCredentials --id /LeanIXCredentials --titles --required --noExtraProps --out lib/schema/LeanIXCredentials.json",
+    "generateSchema:metadata": "npx typescript-json-schema tsconfig.json CustomReportMetadata --id /CustomReportMetadata --titles --required --noExtraProps --out lib/schema/CustomReportMetadata.json"
   },
   "devDependencies": {
     "@types/node": "^14.11.2",

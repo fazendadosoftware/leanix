@@ -3,6 +3,9 @@
   "compilerOptions": {
     "rootDir": "lib",
     "outDir": "dist",
+    "resolveJsonModule": true
   },
-  "exclude": ["dist", "**/*.spec.ts"]
+  "include": ["lib"],
+  "exclude": ["dist", "**/*.spec.ts"],
+  "files": ["lib/schema/LeanIXCredentials.json", "lib/schema/CustomReportMetadata.json"],
 }
