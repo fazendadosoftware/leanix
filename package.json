@@ -12,9 +12,9 @@
     "./packages/*"
   ],
   "scripts": {
-    "clean": "rimraf \"packages/**/dist\" \"packages/**/*.tsbuildinfo\" \"**/*.tgz\"",
+    "clean": "rimraf \"packages/**/dist\" \"packages/**/*.tsbuildinfo\" \"packages/**/*.tgz\" \"packages/**/schema\"",
     "tsc": "tsc",
-    "compile": "npm run tsc --workspaces",
+    "compile": "npm run compile --workspaces",
     "compile:core": "npm run compile -w=@fazendadosoftware/leanix-core",
     "test": "ava",
     "lint": "eslint packages/*",
@@ -39,7 +39,7 @@
   },
   "ava": {
     "files": [
-      "packages/**/*.test.ts"
+      "packages/**/*.spec.ts"
     ],
     "extensions": [
       "ts"

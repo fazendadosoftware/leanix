@@ -1,0 +1,38 @@
+{
+    "$id": "/CustomReportMetadata",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "properties": {
+        "author": {
+            "type": "string"
+        },
+        "defaultConfig": {
+            "additionalProperties": true,
+            "properties": {
+            },
+            "type": "object"
+        },
+        "description": {
+            "type": "string"
+        },
+        "documentationLink": {
+            "type": "string"
+        },
+        "id": {
+            "type": "string"
+        },
+        "name": {
+            "type": "string"
+        },
+        "reportId": {
+            "type": "string"
+        },
+        "title": {
+            "type": "string"
+        },
+        "version": {
+            "type": "string"
+        }
+    },
+    "type": "object"
+}
+

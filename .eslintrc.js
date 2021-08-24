@@ -11,7 +11,7 @@ module.exports = {
     {
       files: ['*.ts', '*.tsx'], // Your TypeScript files extension
       parserOptions: {
-        project: ['./tsconfig.json', '.packages/vite-plugin-leainx/tsconfig.json'] // Specify it only for TypeScript files
+        project: ['./tsconfig.json', '.packages/vite-plugin-leanix/tsconfig.json'] // Specify it only for TypeScript files
       }
     }
   ],

@@ -3,7 +3,7 @@ import jwtDecode from 'jwt-decode'
 import FormData from 'form-data'
 import { c } from 'tar'
 import { resolve } from 'path'
-import { existsSync, writeFileSync, readdirSync, createReadStream, ReadStream } from 'fs'
+import { existsSync, writeFileSync, readdirSync, createReadStream, ReadStream, readFileSync } from 'fs'
 import { URL } from 'url'
 
 export type LeanIXHost = string
@@ -26,7 +26,7 @@ interface LeanIXCredentials {
   apitoken: LeanIXApiToken
 }
 
-interface AccessToken {
+export interface AccessToken {
   accessToken: BearerToken
   expired: boolean
   expiresIn: number
@@ -57,6 +57,22 @@ export interface CustomReportMetadata {
 
 const snakeToCamel = (s: string): string => s.replace(/([-_]\w)/g, g => g[1].toUpperCase())
 
+export const readLxrJson = (path?: string): LeanIXCredentials => {
+  if ((path ?? '').length === 0) path = `${process.cwd()}/lxr.json`
+  const { host, apitoken } = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
+  const credentials = validateCredentials(host, apitoken)
+  return credentials
+}
+
+/*
+export const readMetadataJson = (path?: string): CustomReportMetadata => {
+  if ((path ?? '').length === 0) path = `${process.cwd()}/lxrmeta.json`
+  const parsedContents = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
+  const metadata = validateReportMetadata(parsedContents)
+  return metadata
+}
+*/
+
 export const validateCredentials = (host: string | undefined, apitoken: string | undefined): LeanIXCredentials => {
   if (host === undefined) host = ''
   if (apitoken === undefined) apitoken = ''
@@ -74,7 +90,10 @@ export const getAccessToken = async (credentials: LeanIXCredentials): Promise<Ac
     Authorization: `Basic ${Buffer.from('apitoken:' + credentials.apitoken).toString('base64')}`
   }
   const accessToken: AccessToken = await fetch(uri, { method: 'post', headers })
-    .then(async res => await res.json())
+    .then(async res => {
+      const content = await res[res.headers.get('content-type') === 'application/json' ? 'json' : 'text']()
+      return res.ok ? content : await Promise.reject(res.status)
+    })
     .then(accessToken => Object.entries(accessToken)
       .reduce((accumulator, [key, value]) => ({ ...accumulator, [snakeToCamel(key)]: value }), {
         accessToken: '',
@@ -97,7 +116,6 @@ export const createBundle = async (metadata: CustomReportMetadata, outDir: strin
   const metaFilename = 'lxreport.json'
   const bundleFilename = 'bundle.tgz'
   const targetFilePath = resolve(outDir, bundleFilename)
-  console.log('OUTDIR', outDir)
   if (!existsSync(outDir)) throw Error(`could not find outDir: ${outDir}`)
   writeFileSync(resolve(outDir, metaFilename), JSON.stringify(metadata))
   await c({ gzip: true, cwd: outDir, file: targetFilePath, filter: path => path !== bundleFilename }, readdirSync(outDir))
