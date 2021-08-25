@@ -6,6 +6,7 @@ import { resolve } from 'path'
 import { existsSync, writeFileSync, readdirSync, createReadStream, ReadStream, readFileSync } from 'fs'
 import { URL } from 'url'
 import { validate } from 'jsonschema'
+export { validate, ValidationError } from 'jsonschema'
 
 export type LeanIXHost = string
 export type LeanIXApiToken = string
@@ -67,9 +68,9 @@ export const readLxrJson = async (path?: string): Promise<LeanIXCredentials> => 
   return credentials
 }
 
-export const readMetadataJson = async (path?: string): Promise<CustomReportMetadata> => {
-  if ((path ?? '').length === 0) path = `${process.cwd()}/lxrmeta.json`
-  const parsedContent = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
+export const readMetadataJson = async (path: string = `${process.cwd()}/lxreport.json`): Promise<CustomReportMetadata> => {
+  const fileContent = readFileSync(path).toString()
+  const parsedContent = JSON.parse(fileContent)
   const schema = await import('./schema/CustomReportMetadata.json')
   validate(parsedContent, schema, { throwAll: true })
   return parsedContent

@@ -1,22 +1,40 @@
 import test from 'ava'
-import { createServer, build, InlineConfig } from 'vite'
+import { createServer, build } from 'vite'
+import { resolve } from 'path'
+import { writeFileSync, rmdirSync, existsSync, mkdirSync, readdirSync, createReadStream } from 'fs'
+import { ReadEntry, t as tarT } from 'tar'
+import { v4 as uuid } from 'uuid'
+import { CustomReportMetadata } from '@fazendadosoftware/leanix-core'
 import leanixPlugin from './index'
 
-const getInlineConfig = (port: number = 6666): InlineConfig => ({
-  root: __dirname,
-  server: { port, host: true },
-  plugins: []
+const tmpDir = resolve(__dirname, '../.temp')
+
+const getDummyReportMetadata = (): CustomReportMetadata => ({
+  id: 'net.fazendadosoftware.testReport',
+  name: 'custom-report-name',
+  title: 'Fazenda do Software Test Report',
+  version: '0.1.0',
+  description: 'Custom Report Description',
+  author: 'John Doe',
+  documentationLink: 'https://www.google.com',
+  defaultConfig: {}
 })
 
-test.only('plugin gets the launch url in development', async t => {
+test.before(t => {
+  if (existsSync(tmpDir)) rmdirSync(tmpDir, { recursive: true })
+  mkdirSync(tmpDir, { recursive: true })
+})
+
+test.after.always('cleanup', t => {
+  rmdirSync(tmpDir, { recursive: true })
+})
+
+test('plugin gets the launch url in development', async t => {
   t.timeout(10000, 'timeout occurred!')
-  const inlineConfig = getInlineConfig()
 
   const plugin = leanixPlugin()
+  const server = await createServer({ plugins: [plugin] })
 
-  inlineConfig.plugins?.push(plugin)
-
-  const server = await createServer(inlineConfig)
   await server.listen()
   const interval = setInterval(() => t.log('Waiting for launch url...'), 1000)
   while (plugin.launchUrl === null) await new Promise<void>(resolve => setTimeout(() => resolve(), 100))
@@ -30,14 +48,72 @@ test.only('plugin gets the launch url in development', async t => {
   await server.close()
 })
 
-test('plugin creates custom report bundle with build command', async t => {
+test('plugin creates bundle file "bundle.tgz" when building', async t => {
   t.timeout(10000, 'timeout occurred!')
-  const inlineConfig = getInlineConfig()
 
-  const plugin = leanixPlugin()
+  const testBaseDir: string = resolve(tmpDir, uuid())
 
-  inlineConfig.plugins?.push(plugin)
+  const folders: Record<string, string> = Object.entries({ srcDir: `${testBaseDir}/src`, outDir: `${testBaseDir}/dist` })
+    .reduce((accumulator, [key, value]) => ({ ...accumulator, [key]: resolve(testBaseDir, value) }), {})
 
-  const output = await build(inlineConfig)
-  console.log(output)
+  Object.values(folders).forEach(path => {
+    if (existsSync(path)) rmdirSync(path, { recursive: true })
+    mkdirSync(path, { recursive: true })
+  })
+
+  // Create metadata file
+  const metadataFilePath = `${testBaseDir}/lxreport.json`
+  writeFileSync(metadataFilePath, JSON.stringify(getDummyReportMetadata(), null, 2))
+
+  const projectFiles = {
+    'index.js': 'console.log("hello world")',
+    'index.html': '<html><body>Hello world<script type="module" src="./index.js"></script></body></html>'
+  }
+
+  Object.entries(projectFiles)
+    .forEach(([filename, content]) => writeFileSync(resolve(folders.srcDir, filename), content))
+
+  const assetsFolder = 'assets'
+  const assetsDir = resolve(folders.outDir, assetsFolder)
+
+  const output: any = await build({
+    root: folders.srcDir,
+    build: { outDir: folders.outDir, assetsDir: assetsFolder },
+    plugins: [leanixPlugin({ metadataFilePath })]
+  })
+
+  const chunk = output?.output.find((t: any) => t?.type === 'chunk')
+  t.is(typeof chunk, 'object', 'chunk is an object')
+
+  const assetFilename: string = (chunk.fileName ?? '').split('/')[1]
+  t.true(assetFilename !== undefined, 'assetFilename is not undefined')
+
+  const outDirEntries = readdirSync(folders.outDir)
+  const assetsDirEntries = readdirSync(assetsDir)
+
+  t.true(outDirEntries.length === 4, 'outDir has 4 entries')
+  t.true(assetsDirEntries.length === 1, 'assetsDir has 1 entry')
+  t.is(assetsDirEntries[0], assetFilename, 'generate asset file is in assets folder')
+
+  t.true(outDirEntries.includes('bundle.tgz'), '"bundle.tgz" was generated')
+  const fileStream = createReadStream(resolve(folders.outDir, 'bundle.tgz'))
+
+  const bundleFiles = await new Promise<ReadEntry[]>((resolve, reject) => {
+    const entries: ReadEntry[] = []
+    fileStream.on('open', () => fileStream.pipe(tarT()).on('entry', entry => entries.push(entry)))
+    fileStream.on('error', err => reject(err))
+    fileStream.on('end', () => resolve(entries))
+  })
+
+  t.is(bundleFiles.length, 4, 'bundle file has 4 entries')
+  const assetDirectory = bundleFiles.find(({ path, type }) => type === 'Directory' && path === `${assetsFolder}/`)
+  t.true(assetDirectory !== undefined, `bundle includes asset directory "/${assetsFolder}"`)
+  const indexHtmlFile = bundleFiles.find(({ path, type }) => type === 'File' && path === 'index.html')
+  t.true(indexHtmlFile !== undefined, 'bundle includes file "index.html"')
+  const metadataJsonFile = bundleFiles.find(({ path, type }) => type === 'File' && path === 'lxreport.json')
+  t.true(metadataJsonFile !== undefined, 'bundle includes json metadata file "lxreport.json"')
+  const assetFile = bundleFiles.find(({ path, type }) => type === 'File' && path === `${assetsFolder}/${assetFilename}`)
+  t.true(assetFile !== undefined, `bundle includes generated asset file "${assetsFolder}/${assetFilename}"`)
+
+  Object.values(folders).forEach(path => rmdirSync(path, { recursive: true }))
 })
