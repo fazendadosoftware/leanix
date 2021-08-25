@@ -12,7 +12,7 @@ export default [
   {
     input: 'lib/index.ts',
     plugins: [
-      typescript({ outDir: 'dist/cjs', tsconfig: './tsconfig.json', include: ['lib/**/*'], outputToFilesystem: true }),
+      typescript({ declarationDir: 'dist/types', include: ['lib/**/*'] }),
       json(),
       nodeResolve({ preferBuiltins: true }),
       commonjs(),
@@ -20,13 +20,13 @@ export default [
       summary()
     ],
     output: [
-      { dir: 'dist/cjs', format: 'cjs', sourcemap: true }
+      { dir: 'dist/', format: 'cjs', sourcemap: true, exports: 'auto' }
     ]
   },
   {
     input: 'lib/index.ts',
     plugins: [
-      typescript({ outDir: 'dist/mjs', tsconfig: './tsconfig.json', include: ['lib/**/*'], outputToFilesystem: true }),
+      typescript({ outDir: 'dist/esm', composite: false, declaration: false, include: ['lib/**/*'] }),
       json(),
       nodeResolve({ preferBuiltins: true }),
       commonjs(),
@@ -34,7 +34,7 @@ export default [
       summary()
     ],
     output: [
-      { dir: 'dist/mjs', format: 'esm', sourcemap: true }
+      { dir: 'dist/esm', format: 'esm', sourcemap: true, exports: 'auto' }
     ]
   }
 ]
