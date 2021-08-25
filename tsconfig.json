@@ -8,7 +8,6 @@
     "composite": true,
     "strict": true,
     "moduleResolution": "Node",
-    "baseUrl": "./packages",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,

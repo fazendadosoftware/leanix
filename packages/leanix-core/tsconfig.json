@@ -2,10 +2,9 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "rootDir": "lib",
-    "outDir": "dist",
-    "resolveJsonModule": true
+    "outDir": "dist"
   },
   "include": ["lib"],
-  "exclude": ["dist", "**/*.spec.ts"],
+  "exclude": ["**/*.spec.ts"],
   "files": ["lib/schema/LeanIXCredentials.json", "lib/schema/CustomReportMetadata.json"],
 }
