@@ -66,7 +66,7 @@ test('plugin gets the launch url in development', async t => {
   await server.close()
 })
 
-test('plugin creates bundle file "bundle.tgz" when building', async t => {
+test.only('plugin creates bundle file "bundle.tgz" when building', async t => {
   t.timeout(10000, 'timeout occurred!')
 
   const testBaseDir: string = resolve(tmpDir, uuid())

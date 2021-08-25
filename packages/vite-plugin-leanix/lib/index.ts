@@ -43,6 +43,8 @@ const leanixPlugin = (options?: LeanIXPluginOptions): LeanIXPlugin => {
       // server exposes host and runs in TLS + HTTPS2 mode
       // we disable the open flag as the plugin will handle it
       open = config.server?.open ?? false
+      // required for serving the custom report files in LeanIX
+      config.base = ''
       config.server = { ...config.server ?? {}, https: true, host: true, open: false }
     },
     async configResolved (resolvedConfig: ResolvedConfig) {
