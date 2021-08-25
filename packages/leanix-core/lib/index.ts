@@ -6,6 +6,7 @@ import { resolve } from 'path'
 import { existsSync, writeFileSync, readdirSync, createReadStream, ReadStream, readFileSync } from 'fs'
 import { URL } from 'url'
 import { validate } from 'jsonschema'
+
 export { validate, ValidationError } from 'jsonschema'
 
 export type LeanIXHost = string
@@ -98,6 +99,8 @@ export const getAccessToken = async (credentials: LeanIXCredentials): Promise<Ac
   return accessToken
 }
 
+export const getAccessTokenClaims = (accessToken: AccessToken): JwtClaims => jwtDecode(accessToken.accessToken)
+
 export const getLaunchUrl = (devServerUrl: string, bearerToken: BearerToken): string => {
   const decodedToken: JwtClaims = jwtDecode(bearerToken)
   const urlEncoded = devServerUrl === decodeURIComponent(devServerUrl) ? encodeURIComponent(devServerUrl) : devServerUrl
@@ -118,14 +121,11 @@ export const createBundle = async (metadata: CustomReportMetadata, outDir: strin
 }
 
 interface ReportUploadError {
-  value: string
+  value: 'error'
   messages: string[]
 }
 
-export enum ResponseStatus {
-  OK = 'OK',
-  ERROR = 'ERROR'
-}
+type ResponseStatus = 'OK' | 'ERROR'
 
 interface ResponseData {
   status: ResponseStatus
@@ -140,11 +140,12 @@ interface ReportsResponseData extends ResponseData {
   total: number
   endCursor: string
 }
-
-interface ReportUploadResponseData {
+export interface ReportUploadResponseData {
   type: string
   status: ResponseStatus
   data: { id: ReportId }
+  errorMessage?: string
+  errors?: ReportUploadError[]
 }
 
 export const uploadBundle = async (bundle: CustomReportProjectBundle, bearerToken: BearerToken): Promise<ReportUploadResponseData> => {
@@ -172,7 +173,7 @@ export const fetchWorkspaceReports = async (bearerToken: BearerToken): Promise<C
   let cursor = null
   do {
     const reportResponseData: ReportsResponseData = await fetchReportsPage(cursor)
-    if (reportResponseData.status !== ResponseStatus.OK) return await Promise.reject(reportResponseData)
+    if (reportResponseData.status !== 'OK') return await Promise.reject(reportResponseData)
     reports.push(...reportResponseData.data)
     cursor = reports.length < reportResponseData.total ? reportResponseData.endCursor : null
   } while (cursor !== null)
