@@ -3,19 +3,38 @@ import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import { terser } from 'rollup-plugin-terser'
+import summary from 'rollup-plugin-summary'
 
-export default {
-  input: 'lib/index.ts',
-  output: {
-    dir: 'dist',
-    format: 'es',
-    sourcemap: true
+/**
+ * @type {import('rollup').RollupOptions}
+ */
+export default [
+  {
+    input: 'lib/index.ts',
+    plugins: [
+      typescript({ outDir: 'dist/cjs', tsconfig: './tsconfig.json', include: ['lib/**/*'], outputToFilesystem: true }),
+      json(),
+      nodeResolve({ preferBuiltins: true }),
+      commonjs(),
+      terser({ module: true, warnings: true }),
+      summary()
+    ],
+    output: [
+      { dir: 'dist/cjs', format: 'cjs', sourcemap: true }
+    ]
   },
-  plugins: [
-    typescript({ tsconfig: './tsconfig.json', include: ['lib/**/*'], outputToFilesystem: true }),
-    json(),
-    nodeResolve({ preferBuiltins: true }),
-    commonjs(),
-    terser()
-  ]
-}
+  {
+    input: 'lib/index.ts',
+    plugins: [
+      typescript({ outDir: 'dist/mjs', tsconfig: './tsconfig.json', include: ['lib/**/*'], outputToFilesystem: true }),
+      json(),
+      nodeResolve({ preferBuiltins: true }),
+      commonjs(),
+      terser({ module: true, warnings: true }),
+      summary()
+    ],
+    output: [
+      { dir: 'dist/mjs', format: 'esm', sourcemap: true }
+    ]
+  }
+]
