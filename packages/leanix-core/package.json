@@ -1,6 +1,6 @@
 {
   "name": "@fazendadosoftware/leanix-core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Library with core functionality for interfacing with LeanIX Custom Report API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -27,7 +27,6 @@
     "uuid": "^8.3.2"
   },
   "dependencies": {
-    "dotenv": "^10.0.0",
     "form-data": "^3.0.1",
     "jsonschema": "^1.4.0",
     "jwt-decode": "^3.1.2",

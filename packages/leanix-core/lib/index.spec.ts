@@ -4,7 +4,6 @@ import { resolve } from 'path'
 import { existsSync, mkdirSync, rmdirSync, writeFileSync } from 'fs'
 import { ReadEntry, t as tarT } from 'tar'
 import { readLxrJson, getAccessToken, getLaunchUrl, createBundle, CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, uploadBundle } from './index'
-require('dotenv').config() // eslint-disable-line
 
 const getDummyReportMetadata = (): CustomReportMetadata => ({
   id: 'net.fazendadosoftware.testReport',
