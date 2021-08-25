@@ -13,14 +13,12 @@
   ],
   "scripts": {
     "clean": "rimraf \"packages/**/dist\" \"**/*.tsbuildinfo\" \"**/*.tgz\" \"**/.temp\"",
-    "tsc": "tsc",
-    "compile": "npm run compile --workspaces",
-    "compile:core": "npm run compile -w=@fazendadosoftware/leanix-core",
+    "build": "npm run build -w=@fazendadosoftware/leanix-core && npm run build -w=@fazendadosoftware/vite-plugin-leanix",
     "dev": "npm run dev -w=@fazendadosoftware/custom-report-vite-demo",
     "test": "ava",
     "lint": "eslint packages/*",
     "fix": "eslint packages/* --fix",
-    "publish": "npm run clean && npm run compile && npm run test && npm publish --access=public --workspaces"
+    "publish": "npm run clean && npm run build && npm run test && npm publish --access=public --workspaces"
   },
   "devDependencies": {
     "@ava/typescript": "^2.0.0",

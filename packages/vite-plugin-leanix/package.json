@@ -13,7 +13,7 @@
     "leanix"
   ],
   "scripts": {
-    "compile": "tsc"
+    "build": "rollup -c rollup.config.js"
   },
   "dependencies": {
     "@fazendadosoftware/leanix-core": "^0.1.0",
