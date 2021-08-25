@@ -16,6 +16,7 @@
     "tsc": "tsc",
     "compile": "npm run compile --workspaces",
     "compile:core": "npm run compile -w=@fazendadosoftware/leanix-core",
+    "dev": "npm run dev -w=@fazendadosoftware/custom-report-vite-demo",
     "test": "ava",
     "lint": "eslint packages/*",
     "fix": "eslint packages/* --fix",

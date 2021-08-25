@@ -1,10 +1,10 @@
-import test from 'ava'
+import test, { ExecutionContext } from 'ava'
 import { createServer, build } from 'vite'
 import { resolve } from 'path'
 import { writeFileSync, rmdirSync, existsSync, mkdirSync, readdirSync, createReadStream } from 'fs'
 import { ReadEntry, t as tarT } from 'tar'
 import { v4 as uuid } from 'uuid'
-import { CustomReportMetadata } from '@fazendadosoftware/leanix-core'
+import { CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, readLxrJson, getAccessToken, AccessToken } from '@fazendadosoftware/leanix-core'
 import leanixPlugin from './index'
 
 const tmpDir = resolve(__dirname, '../.temp')
@@ -20,13 +20,31 @@ const getDummyReportMetadata = (): CustomReportMetadata => ({
   defaultConfig: {}
 })
 
-test.before(t => {
+let accessToken: AccessToken | null = null
+
+const deleteExistingReportInWorkspace = async (t: ExecutionContext | null, accessToken: AccessToken | null): Promise<AccessToken> => {
+  const { id, version } = getDummyReportMetadata()
+  const credentials = await readLxrJson()
+  if (accessToken === null) accessToken = await getAccessToken(credentials)
+  const reports = await fetchWorkspaceReports(accessToken.accessToken)
+  const { id: reportId = null } = reports.find(({ reportId, version: reportVersion }) => reportId === id && reportVersion === version) ?? {}
+  if (reportId !== null) {
+    const status = await deleteWorkspaceReportById(reportId, accessToken.accessToken)
+    if (status === 204) t?.log('Deleted existing report in workspace')
+    else t?.log(`Error deleting report in workspace. Got ${status}`)
+  }
+  return accessToken
+}
+
+test.before(async t => {
   if (existsSync(tmpDir)) rmdirSync(tmpDir, { recursive: true })
   mkdirSync(tmpDir, { recursive: true })
+  accessToken = await deleteExistingReportInWorkspace(t, accessToken)
 })
 
-test.after.always('cleanup', t => {
+test.after.always('cleanup', async t => {
   rmdirSync(tmpDir, { recursive: true })
+  await deleteExistingReportInWorkspace(t, accessToken)
 })
 
 test('plugin gets the launch url in development', async t => {
@@ -48,7 +66,7 @@ test('plugin gets the launch url in development', async t => {
   await server.close()
 })
 
-test.only('plugin creates bundle file "bundle.tgz" when building', async t => {
+test('plugin creates bundle file "bundle.tgz" when building', async t => {
   t.timeout(10000, 'timeout occurred!')
 
   const testBaseDir: string = resolve(tmpDir, uuid())

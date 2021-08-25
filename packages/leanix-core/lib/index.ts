@@ -37,7 +37,7 @@ export interface AccessToken {
   tokenType: string
 }
 
-interface JwtClaims {
+export interface JwtClaims {
   exp: number
   instanceUrl: string
   iss: string
@@ -180,7 +180,7 @@ export const fetchWorkspaceReports = async (bearerToken: BearerToken): Promise<C
   return reports
 }
 
-export const deleteWorkspaceReportById = async (reportId: ReportId, bearerToken: BearerToken): Promise<number> => {
+export const deleteWorkspaceReportById = async (reportId: ReportId, bearerToken: BearerToken): Promise<204 | number> => {
   const decodedToken: JwtClaims = jwtDecode(bearerToken)
   const headers = { Authorization: `Bearer ${bearerToken}` }
   const url = new URL(`${decodedToken.instanceUrl}/services/pathfinder/v1/reports/${reportId}`)
