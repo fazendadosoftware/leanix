@@ -123,3 +123,5 @@ build
 tsconfig.tsbuildinfo
 dist
 .temp
+
+*.json
