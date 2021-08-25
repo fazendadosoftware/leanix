@@ -9,9 +9,9 @@ module.exports = {
   ignorePatterns: ['**/dist'],
   overrides: [
     {
-      files: ['*.ts', '*.tsx'], // Your TypeScript files extension
+      files: ['*.ts'],
       parserOptions: {
-        project: ['./tsconfig.json', '.packages/vite-plugin-leanix/tsconfig.json'] // Specify it only for TypeScript files
+        project: ['./tsconfig.json']
       }
     }
   ],
