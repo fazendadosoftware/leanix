@@ -9,20 +9,20 @@ import { validate } from 'jsonschema'
 
 export { validate, ValidationError } from 'jsonschema'
 
-export type LeanIXHost = string
-export type LeanIXApiToken = string
-export type BearerToken = string
-export type LeanIXWorkspaceId = string
-export type LeanIXWorkspaceName = string
+type LeanIXHost = string
+type LeanIXApiToken = string
+type BearerToken = string
+type LeanIXWorkspaceId = string
+type LeanIXWorkspaceName = string
+type ReportId = string
+type ReportName = string
+type ReportTitle = string
+type ReportVersion = string
+type ReportDescription = string
+type ReportAuthor = string
+type ReportDocumentationLink = string
+type ReportConfig = object
 export type CustomReportProjectBundle = ReadStream
-export type ReportId = string
-export type ReportName = string
-export type ReportTitle = string
-export type ReportVersion = string
-export type ReportDescription = string
-export type ReportAuthor = string
-export type ReportDocumentationLink = string
-export type ReportConfig = object
 
 export interface LeanIXCredentials {
   host: LeanIXHost

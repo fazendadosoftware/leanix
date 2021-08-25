@@ -1,7 +1,7 @@
 {
   "name": "@fazendadosoftware/leanix-core",
   "version": "0.1.0",
-  "description": "",
+  "description": "Library with core functionality for interfacing with LeanIX Custom Report API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [

@@ -1,8 +1,8 @@
 {
   "name": "@fazendadosoftware/leanix-projects",
   "version": "0.1.0",
-  "private": true,
-  "description": "",
+  "private": false,
+  "description": "Collection of projects developed for LeanIX",
   "author": {
     "name": "Paulo dos Santos",
     "email": "paulo@fazendadosoftware.com"
