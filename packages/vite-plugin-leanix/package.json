@@ -1,6 +1,6 @@
 {
   "name": "@fazendadosoftware/vite-plugin-leanix",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A Vite plugin for developing LeanIX Custom Reports",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -22,6 +22,7 @@
     "vite": "^2.5.1"
   },
   "dependencies": {
+    "@fazendadosoftware/leanix-core": "^0.1.0",
     "open": "^8.2.1"
   }
 }
