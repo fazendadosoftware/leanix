@@ -12,8 +12,8 @@ export default [
   {
     input: 'lib/index.ts',
     plugins: [
-      typescript({ declarationDir: 'dist/types', include: ['lib/**/*'] }),
-      json(),
+      typescript({ declarationDir: 'dist/types', include: ['lib/**/*'], outputToFilesystem: true }),
+      json({ compact: true }),
       nodeResolve({ preferBuiltins: true }),
       commonjs(),
       terser({ module: true, warnings: true }),
@@ -26,8 +26,8 @@ export default [
   {
     input: 'lib/index.ts',
     plugins: [
-      typescript({ outDir: 'dist/esm', composite: false, declaration: false, include: ['lib/**/*'] }),
-      json(),
+      typescript({ outDir: 'dist/esm', composite: false, declaration: false, include: ['lib/**/*'], outputToFilesystem: true }),
+      json({ compact: true }),
       nodeResolve({ preferBuiltins: true }),
       commonjs(),
       terser({ module: true, warnings: true }),
