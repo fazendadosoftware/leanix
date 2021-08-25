@@ -33,6 +33,7 @@ const leanixPlugin = (options?: LeanIXPluginOptions): LeanIXPlugin => {
   const metadataFilePath = options?.metadataFilePath ?? `${process.cwd()}/lxreport.json`
   let accessToken: AccessToken | null = null
   let claims: JwtClaims | null = null
+  let isProduction: boolean = false
 
   return {
     name: 'vite-plugin-leanix',
@@ -48,22 +49,25 @@ const leanixPlugin = (options?: LeanIXPluginOptions): LeanIXPlugin => {
       config.server = { ...config.server ?? {}, https: true, host: true, open: false }
     },
     async configResolved (resolvedConfig: ResolvedConfig) {
+      isProduction = resolvedConfig.isProduction
       logger = resolvedConfig.logger
-      let credentials: LeanIXCredentials = { host: '', apitoken: '' }
-      try {
-        credentials = await readLxrJson()
-      } catch (error) {
-        logger?.error('💥 Invalid lxr.json file, required params are "host" and "apitoken".')
-        process.exit(1)
-      }
-      try {
-        accessToken = await getAccessToken(credentials)
-        claims = getAccessTokenClaims(accessToken)
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        if (claims !== null) logger?.info(`🔥 Your workspace is ${claims.principal.permission.workspaceName}`)
-      } catch (err) {
-        logger?.error(err === 401 ? '💥 Invalid LeanIX API token' : err)
-        process.exit(1)
+      if (resolvedConfig.command === 'serve' || resolvedConfig.isProduction) {
+        let credentials: LeanIXCredentials = { host: '', apitoken: '' }
+        try {
+          credentials = await readLxrJson()
+        } catch (error) {
+          logger?.error('💥 Invalid lxr.json file, required params are "host" and "apitoken".')
+          process.exit(1)
+        }
+        try {
+          accessToken = await getAccessToken(credentials)
+          claims = getAccessTokenClaims(accessToken)
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          if (claims !== null) logger?.info(`🔥 Your workspace is ${claims.principal.permission.workspaceName}`)
+        } catch (err) {
+          logger?.error(err === 401 ? '💥 Invalid LeanIX API token' : err)
+          process.exit(1)
+        }
       }
     },
     configureServer ({ config: { server: { host, https } }, httpServer }) {
@@ -111,7 +115,7 @@ const leanixPlugin = (options?: LeanIXPluginOptions): LeanIXPlugin => {
         logger?.error('💥 Error while create project bundle file.')
         process.exit(1)
       }
-      if (bundle !== undefined && accessToken?.accessToken !== undefined) {
+      if (bundle !== undefined && accessToken?.accessToken !== undefined && isProduction) {
         try {
           const result = await uploadBundle(bundle, accessToken.accessToken)
           if (result.status === 'ERROR') {
@@ -126,6 +130,8 @@ const leanixPlugin = (options?: LeanIXPluginOptions): LeanIXPlugin => {
           logger?.error(`💥 ${JSON.stringify(err)}`)
           process.exit(1)
         }
+      } else if (!isProduction) {
+        logger?.warn('⚠️ Not in "production" mode, report will not be uploaded to the LeanIX workspace.')
       }
     }
   }
