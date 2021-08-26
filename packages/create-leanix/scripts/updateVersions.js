@@ -2,8 +2,7 @@ const { readdirSync, writeFileSync } = require('fs')
 const { join } = require('path')
 const packageJson = require('package-json')
 const { gt, gtr, minVersion } = require('semver')
-const chalk = require('chalk')
-const { blue, green, bold, redBright } = chalk
+const { blue, green, bold, redBright } = require('chalk')
 const log = console.log
 
   ; (async () => {
