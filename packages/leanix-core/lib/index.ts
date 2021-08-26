@@ -5,9 +5,11 @@ import { c } from 'tar'
 import { resolve } from 'path'
 import { existsSync, writeFileSync, readdirSync, createReadStream, ReadStream, readFileSync } from 'fs'
 import { URL } from 'url'
-import { validate } from 'jsonschema'
+import { validate, ValidatorResult } from 'jsonschema'
+import LeanIXCredentialsSchema from './schema/LeanIXCredentials.json'
+import CustomReportMetadataSchema from './schema/CustomReportMetadata.json'
 
-export { validate, ValidationError } from 'jsonschema'
+export { validate, ValidationError, ValidatorResult } from 'jsonschema'
 
 type LeanIXHost = string
 type LeanIXApiToken = string
@@ -60,20 +62,37 @@ export interface CustomReportMetadata {
 
 const snakeToCamel = (s: string): string => s.replace(/([-_]\w)/g, g => g[1].toUpperCase())
 
+// utility function for validating "lxr.json" and "lxreport.json" files
+export const validateDocument = async (document: any, name: 'lxr.json' | 'lxreport.json'): Promise<ValidatorResult> => {
+  let schema: any
+  switch (name) {
+    case 'lxr.json':
+      schema = LeanIXCredentialsSchema
+      break
+    case 'lxreport.json':
+      schema = CustomReportMetadataSchema
+      break
+    default:
+      schema = null
+  }
+  if (schema === null) throw Error(`unknown document name ${name}`)
+  const result = validate(document, schema, { throwAll: true })
+  return result
+}
+
 export const readLxrJson = async (path?: string): Promise<LeanIXCredentials> => {
   if ((path ?? '').length === 0) path = `${process.cwd()}/lxr.json`
   const { host, apitoken } = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
   const credentials: LeanIXCredentials = { host, apitoken }
-  const schema = await import('./schema/LeanIXCredentials.json')
-  validate(credentials, schema, { throwAll: true })
+  await validateDocument(credentials, 'lxr.json')
+  validate(credentials, LeanIXCredentialsSchema, { throwAll: true })
   return credentials
 }
 
 export const readMetadataJson = async (path: string = `${process.cwd()}/lxreport.json`): Promise<CustomReportMetadata> => {
   const fileContent = readFileSync(path).toString()
   const parsedContent = JSON.parse(fileContent)
-  const schema = await import('./schema/CustomReportMetadata.json')
-  validate(parsedContent, schema, { throwAll: true })
+  await validateDocument(parsedContent, 'lxreport.json')
   return parsedContent
 }
 

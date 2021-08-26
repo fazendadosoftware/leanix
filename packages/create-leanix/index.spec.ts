@@ -35,8 +35,8 @@ const getAllFiles = (dirPath: string, arrayOfFiles: string[] = []): string[] => 
   return arrayOfFiles
 }
 
-// Vue 3 starter template
-const templateFiles = getAllFiles(join(CLI_PATH, 'templates', 'vue'))
+// Vue 3 starter template plus 2 leanix-specific generated files: 'lxr.json' and 'lxreport.json'
+const templateFiles = [...getAllFiles(join(CLI_PATH, 'templates', 'vue')), 'lxreport.json', 'lxr.json']
   .map(file => file === '_gitignore' ? '.gitignore' : file)
   .sort()
 
@@ -77,7 +77,7 @@ test('asks to overwrite non-empty current directory', t => {
 })
 
 test.serial('successfully scaffolds a project based on vue starter template', async t => {
-  const { stdout } = run([projectName, '--template', 'vue'], {
+  const { stdout, stderr } = run([projectName, '--template', 'vue'], {
     cwd: __dirname
   })
 

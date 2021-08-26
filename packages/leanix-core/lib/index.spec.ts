@@ -3,7 +3,7 @@ import { URL } from 'url'
 import { resolve } from 'path'
 import { existsSync, mkdirSync, rmdirSync, writeFileSync } from 'fs'
 import { ReadEntry, t as tarT } from 'tar'
-import { readLxrJson, getAccessToken, getLaunchUrl, createBundle, CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, uploadBundle } from './index'
+import { validateDocument, readLxrJson, getAccessToken, getLaunchUrl, createBundle, CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, uploadBundle } from './index'
 
 const getDummyReportMetadata = (): CustomReportMetadata => ({
   id: 'net.fazendadosoftware.testReport',
@@ -14,6 +14,18 @@ const getDummyReportMetadata = (): CustomReportMetadata => ({
   author: 'John Doe',
   documentationLink: 'https://www.google.com',
   defaultConfig: {}
+})
+
+test('validate "lxr.json" and "lxreport.json" against document schemas', async t => {
+  const validMetadataDocument = getDummyReportMetadata()
+  const invalidMetadataDocument = { ...validMetadataDocument, id: undefined }
+
+  await t.notThrowsAsync(validateDocument(validMetadataDocument, 'lxreport.json'))
+  await t.throwsAsync(validateDocument(invalidMetadataDocument, 'lxreport.json'))
+
+  await t.notThrowsAsync(validateDocument({ host: 'app.leanix.net', apitoken: 'token' }, 'lxr.json'))
+  await t.throwsAsync(validateDocument({ host: 'app.leanix.net' }, 'lxr.json'))
+  
 })
 
 test('getAccessToken returns a token', async t => {

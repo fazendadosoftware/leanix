@@ -18,6 +18,8 @@ const {
   red
 } = require('kolorist')
 
+const { validateDocument } = require('@fazendadosoftware/leanix-core')
+
 const cwd = process.cwd()
 
 const FRAMEWORKS = [
@@ -129,6 +131,55 @@ const renameFiles = {
   _gitignore: '.gitignore'
 }
 
+const getLeanIXQuestions = ({ id = null }) => ([
+  {
+    type: id == null ? 'text' : null,
+    name: 'reportId',
+    message: 'Unique id for this report in Java package notation (e.g. net.leanix.barcharts)'
+  },
+  {
+    type: 'text',
+    name: 'author',
+    message: 'Who is the author of this report (e.g. LeanIX GmbH)',
+    initial: 'LeanIX GmbH'
+  },
+  {
+    type: 'text',
+    name: 'text',
+    message: 'A title to be shown in LeanIX when report is installed',
+    initial: 'Report Title'
+  },
+  {
+    type: 'text',
+    name: 'description',
+    message: 'Description of your project',
+    initial: 'Custom Report Description'
+  },
+  {
+    type: 'text',
+    name: 'host',
+    initial: 'app.leanix.net',
+    message: 'Which host do you want to work with?'
+  },
+  {
+    type: 'text',
+    name: 'apitoken',
+    message: 'API-Token for Authentication (see: https://dev.leanix.net/docs/authentication#section-generate-api-tokens)',
+    initial: 'apitokenhere'
+  },
+  {
+    type: 'confirm',
+    name: 'behindProxy',
+    message: 'Are you behind a proxy?',
+    initial: false
+  },
+  {
+    type: prev => prev && 'text',
+    name: 'proxyURL',
+    message: 'Proxy URL?'
+  }
+])
+
 async function init () {
   let targetDir = argv._[0]
   let template = argv.template || argv.t
@@ -206,7 +257,9 @@ async function init () {
                 value: variant.name
               }
             })
-        }
+        },
+        // @ts-ignore
+        ...getLeanIXQuestions()
       ],
       {
         onCancel: () => {
@@ -221,6 +274,8 @@ async function init () {
 
   // user choice associated with prompts
   const { framework, overwrite, packageName, variant } = result
+  // leanix-specific answers
+  const { reportId, author, title, description, host, apitoken, behindProxy, proxyURL } = result
 
   const root = path.join(cwd, targetDir)
 
@@ -255,9 +310,36 @@ async function init () {
 
   const pkg = require(path.join(templateDir, 'package.json'))
 
-  pkg.name = packageName || targetDir
+  const reportName = packageName || targetDir
+  pkg.name = reportName
 
-  write('package.json', JSON.stringify(pkg, null, 2))
+  const generatedFiles = {
+    'package.json': { content: pkg },
+    'lxr.json': { validateContent: true, content: { host, apitoken } },
+    'lxreport.json': {
+      validateContent: true,
+      content: {
+        id: reportId,
+        name: reportName,
+        version: pkg.version,
+        author,
+        title,
+        description,
+        documentationLink: '',
+        defaultConfig: {}
+      }
+    }
+  }
+
+  Object.entries(generatedFiles)
+    .forEach(([filename, { validateContent = false, content }]) => {
+      // @ts-ignore
+      if (validateContent === true) validateDocument(content, filename)
+        .catch(error => {
+          console.error(error)
+        })
+      write(filename, JSON.stringify(content, null, 2) + '\n')
+    })
 
   const pkgInfo = pkgFromUserAgent(process.env.npm_config_user_agent)
   const pkgManager = pkgInfo ? pkgInfo.name : 'npm'
