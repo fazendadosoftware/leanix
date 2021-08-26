@@ -14,7 +14,6 @@
   "scripts": {
     "lint": "eslint packages/*",
     "fix": "eslint packages/* --fix",
-    "test-build": "cross-env VITE_TEST_BUILD=1 jest",
     "clean": "rimraf \"packages/**/dist\" \"**/*.tsbuildinfo\" \"**/*.tgz\" \"**/.temp\" \"**/.rollup.cache\"",
     "build": "npm run build -w=@fazendadosoftware/leanix-core && npm run build -w=@fazendadosoftware/vite-plugin-leanix",
     "dev": "npm run dev -w=@fazendadosoftware/custom-report-vite-demo",

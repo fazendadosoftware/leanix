@@ -36,8 +36,7 @@ const FRAMEWORKS = [
         color: blue
       }
     ]
-  }
-  /*
+  },
   {
     name: 'vue',
     color: green,
@@ -53,7 +52,8 @@ const FRAMEWORKS = [
         color: blue
       }
     ]
-  },
+  }
+  /*
   {
     name: 'react',
     color: cyan,
