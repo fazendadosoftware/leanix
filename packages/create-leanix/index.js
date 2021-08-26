@@ -235,7 +235,7 @@ async function init () {
 
   console.log(`\nScaffolding project in ${root}...`)
 
-  const templateDir = path.join(__dirname, `template-${template}`)
+  const templateDir = path.join(__dirname, 'templates', template)
 
   const write = (file, content) => {
     const targetPath = renameFiles[file]

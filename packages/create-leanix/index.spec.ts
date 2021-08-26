@@ -36,7 +36,7 @@ const getAllFiles = (dirPath: string, arrayOfFiles: string[] = []): string[] => 
 }
 
 // Vue 3 starter template
-const templateFiles = getAllFiles(join(CLI_PATH, 'template-vue'))
+const templateFiles = getAllFiles(join(CLI_PATH, 'templates', 'vue'))
   .map(file => file === '_gitignore' ? '.gitignore' : file)
   .sort()
 
