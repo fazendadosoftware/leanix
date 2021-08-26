@@ -7,8 +7,8 @@
     "build": "vite build --mode development"
   },
   "devDependencies": {
-    "@fazendadosoftware/vite-plugin-leanix": "^0.1.5",
-    "vite": "^2.5.1"
+    "vite": "^2.5.1",
+    "@fazendadosoftware/vite-plugin-leanix": "0.1.5"
   },
   "dependencies": {
     "@leanix/reporting": "^0.4.87"
