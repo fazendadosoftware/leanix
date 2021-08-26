@@ -1,6 +1,7 @@
 MIT License
 
-Copyright (c) 2021 Fazenda do Software EIRELI
+Copyright (c) 2021-present Fazenda do Software EIRELI
+Copyright (c) 2019-present, Yuxi (Evan) You and Vite contributors
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

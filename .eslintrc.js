@@ -1,28 +1,26 @@
-module.exports = {
-  env: {
-    node: true,
-    es2021: true
-  },
+// @ts-check
+const { defineConfig } = require('eslint-define-config')
+
+module.exports = defineConfig({
+  root: true,
   extends: [
     'standard-with-typescript'
   ],
-  ignorePatterns: ['**/dist'],
-  overrides: [
-    {
-      files: ['*.ts'],
-      parserOptions: {
-        project: ['./tsconfig.json']
-      }
-    }
-  ],
   parser: '@typescript-eslint/parser',
   parserOptions: {
-    ecmaVersion: 12,
-    sourceType: 'module'
+    sourceType: 'module',
+    ecmaVersion: 2020,
+    project: ['./tsconfig.json']
   },
+  ignorePatterns: ['**/dist', '.eslintrc.js'],
   rules: {
   },
   globals: {
     NodeJS: true
-  }
-}
+  },
+  env: {
+    node: true,
+    es2021: true,
+    jest: true
+  },
+})
