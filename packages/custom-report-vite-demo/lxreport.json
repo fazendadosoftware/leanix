@@ -1,0 +1,10 @@
+{
+  "id": "net.fazendadosoftware.customReportViteDemo",
+  "name": "custom-report-vite-demo",
+  "title": "LeanIX Custom Report using ViteJS",
+  "version": "0.1.0",
+  "description": "Demo project for a custom report using ViteJS and the vite-plugin-leanix",
+  "author": "Paulo dos Santos",
+  "documentationLink": "https://github.com/fazendadosoftware/leanix",
+  "defaultConfig": {}
+}

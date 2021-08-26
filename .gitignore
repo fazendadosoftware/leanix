@@ -124,5 +124,5 @@ tsconfig.tsbuildinfo
 dist
 .temp
 
-*.json
 .rollup.cache
+lxr.json

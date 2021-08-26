@@ -1,0 +1,17 @@
+{
+  "name": "vite-typescript-starter",
+  "version": "0.0.0",
+  "scripts": {
+    "serve": "vite",
+    "upload": "tsc && vite build",
+    "build": "tsc && vite build --mode development"
+  },
+  "devDependencies": {
+    "@fazendadosoftware/vite-plugin-leanix": "^0.1.5",
+    "typescript": "^4.3.5",
+    "vite": "^2.5.1"
+  },
+  "dependencies": {
+    "@leanix/reporting": "^0.4.87"
+  }
+}
