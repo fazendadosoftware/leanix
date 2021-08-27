@@ -1,11 +1,14 @@
 #!/usr/bin/env node
 
 // @ts-check
-const fs = require('fs')
-const path = require('path')
+const { existsSync, mkdirSync, writeFileSync, readdirSync, lstatSync, rmdirSync, unlinkSync, statSync, copyFileSync } = require('fs')
+const { join, resolve, relative } = require('path')
 // Avoids autoconversion to number of the project name by defining that the args
 // non associated with an option ( _ ) needs to be parsed as a string. See #4606
-const argv = require('minimist')(process.argv.slice(2), { string: ['_'] })
+// const argv = require('minimist')(process.argv.slice(2), { string: ['_'] })
+
+const yargs = require('yargs/yargs')
+const { hideBin } = require('yargs/helpers')
 
 const prompts = require('prompts')
 const {
@@ -131,44 +134,40 @@ const renameFiles = {
   _gitignore: '.gitignore'
 }
 
-const getLeanIXQuestions = ({ id = null }) => ([
+const getLeanIXQuestions = ({ reportId, author, title, description, host, apitoken, proxyURL }) => ([
   {
-    type: id == null ? 'text' : null,
+    type: reportId === undefined ? 'text' : null,
     name: 'reportId',
     message: 'Unique id for this report in Java package notation (e.g. net.leanix.barcharts)'
   },
   {
-    type: 'text',
+    type: author === undefined ? 'text' : null,
     name: 'author',
-    message: 'Who is the author of this report (e.g. LeanIX GmbH)',
-    initial: 'LeanIX GmbH'
+    message: 'Who is the author of this report (e.g. LeanIX GmbH)'
   },
   {
-    type: 'text',
-    name: 'text',
-    message: 'A title to be shown in LeanIX when report is installed',
-    initial: 'Report Title'
+    type: title === undefined ? 'text' : null,
+    name: 'title',
+    message: 'A title to be shown in LeanIX when report is installed'
   },
   {
-    type: 'text',
+    type: description === undefined ? 'text' : null,
     name: 'description',
-    message: 'Description of your project',
-    initial: 'Custom Report Description'
+    message: 'Description of your project'
   },
   {
-    type: 'text',
+    type: host === undefined ? 'text' : null,
     name: 'host',
     initial: 'app.leanix.net',
     message: 'Which host do you want to work with?'
   },
   {
-    type: 'text',
+    type: apitoken === undefined ? 'text' : null,
     name: 'apitoken',
-    message: 'API-Token for Authentication (see: https://dev.leanix.net/docs/authentication#section-generate-api-tokens)',
-    initial: 'apitokenhere'
+    message: 'API-Token for Authentication (see: https://dev.leanix.net/docs/authentication#section-generate-api-tokens)'
   },
   {
-    type: 'confirm',
+    type: proxyURL === undefined ? 'confirm' : null,
     name: 'behindProxy',
     message: 'Are you behind a proxy?',
     initial: false
@@ -180,14 +179,26 @@ const getLeanIXQuestions = ({ id = null }) => ([
   }
 ])
 
-async function init () {
-  let targetDir = argv._[0]
-  let template = argv.template || argv.t
+async function init (argv) {
+  let { targetDir = null, template = null } = argv
+  // leanix-specific answers
+  let { reportId, author, title, description, host, apitoken, proxyURL } = argv
 
-  const defaultProjectName = !targetDir ? 'vite-project' : targetDir
+  const defaultProjectName = targetDir ?? 'vite-project'
 
   let result = {}
-
+  /*
+  prompts.inject([
+    'the report id',
+    'the author',
+    'the title',
+    'the description',
+    'the host...',
+    'the token...',
+    true,
+    'the proxy'
+  ])
+  */
   try {
     result = await prompts(
       [
@@ -196,12 +207,10 @@ async function init () {
           name: 'projectName',
           message: 'Project name:',
           initial: defaultProjectName,
-          onState: (state) =>
-            (targetDir = state.value.trim() || defaultProjectName)
+          onState: state => (targetDir = state.value.trim() || defaultProjectName)
         },
         {
-          type: () =>
-            !fs.existsSync(targetDir) || isEmpty(targetDir) ? null : 'confirm',
+          type: () => !existsSync(targetDir) || isEmpty(targetDir) ? null : 'confirm',
           name: 'overwrite',
           message: () =>
             (targetDir === '.'
@@ -210,11 +219,8 @@ async function init () {
             ' is not empty. Remove existing files and continue?'
         },
         {
-          // @ts-ignore
           type: (_, { overwrite } = {}) => {
-            if (overwrite === false) {
-              throw new Error(red('✖') + ' Operation cancelled')
-            }
+            if (overwrite === false) throw new Error(red('✖') + ' Operation cancelled')
             return null
           },
           name: 'overwriteChecker'
@@ -224,8 +230,7 @@ async function init () {
           name: 'packageName',
           message: 'Package name:',
           initial: () => toValidPackageName(targetDir),
-          validate: (dir) =>
-            isValidPackageName(dir) || 'Invalid package.json name'
+          validate: dir => isValidPackageName(dir) || 'Invalid package.json name'
         },
         {
           type: template && TEMPLATES.includes(template) ? null : 'select',
@@ -235,7 +240,7 @@ async function init () {
               ? `"${template}" isn't a valid template. Please choose from below: `
               : 'Select a framework:',
           initial: 0,
-          choices: FRAMEWORKS.map((framework) => {
+          choices: FRAMEWORKS.map(framework => {
             const frameworkColor = framework.color
             return {
               title: frameworkColor(framework.name),
@@ -244,13 +249,11 @@ async function init () {
           })
         },
         {
-          type: (framework) =>
-            framework && framework.variants ? 'select' : null,
+          type: framework => framework && framework.variants ? 'select' : null,
           name: 'variant',
           message: 'Select a variant:',
-          // @ts-ignore
-          choices: (framework) =>
-            framework.variants.map((variant) => {
+          choices: framework => framework.variants
+            .map(variant => {
               const variantColor = variant.color
               return {
                 title: variantColor(variant.name),
@@ -259,7 +262,7 @@ async function init () {
             })
         },
         // @ts-ignore
-        ...getLeanIXQuestions()
+        ...getLeanIXQuestions(argv)
       ],
       {
         onCancel: () => {
@@ -273,49 +276,45 @@ async function init () {
   }
 
   // user choice associated with prompts
-  const { framework, overwrite, packageName, variant } = result
+  const { framework, overwrite, packageName, variant } = result;
   // leanix-specific answers
-  const { reportId, author, title, description, host, apitoken, behindProxy, proxyURL } = result
+  ({
+    reportId = reportId,
+    author = author,
+    title = title,
+    description = description,
+    host = host,
+    apitoken = apitoken,
+    proxyURL = proxyURL
+  } = result)
 
-  const root = path.join(cwd, targetDir)
+  const root = join(cwd, targetDir)
 
-  if (overwrite) {
-    emptyDir(root)
-  } else if (!fs.existsSync(root)) {
-    fs.mkdirSync(root)
-  }
+  if (overwrite) emptyDir(root)
+  else if (!existsSync(root)) mkdirSync(root)
 
   // determine template
   template = variant || framework || template
 
   console.log(`\nScaffolding project in ${root}...`)
 
-  const templateDir = path.join(__dirname, 'templates', template)
+  const templateDir = join(__dirname, 'templates', template)
 
   const write = (file, content) => {
-    const targetPath = renameFiles[file]
-      ? path.join(root, renameFiles[file])
-      : path.join(root, file)
-    if (content) {
-      fs.writeFileSync(targetPath, content)
-    } else {
-      copy(path.join(templateDir, file), targetPath)
-    }
+    const targetPath = join(root, renameFiles[file] || file)
+    content ? writeFileSync(targetPath, content) : copy(join(templateDir, file), targetPath)
   }
 
-  const files = fs.readdirSync(templateDir)
-  for (const file of files.filter((f) => f !== 'package.json')) {
-    write(file)
-  }
+  readdirSync(templateDir).filter(f => f !== 'package.json').forEach(file => write(file))
 
-  const pkg = require(path.join(templateDir, 'package.json'))
+  const pkg = require(join(templateDir, 'package.json'))
 
   const reportName = packageName || targetDir
   pkg.name = reportName
 
   const generatedFiles = {
     'package.json': { content: pkg },
-    'lxr.json': { validateContent: true, content: { host, apitoken } },
+    'lxr.json': { validateContent: true, content: { host, apitoken, proxyURL } },
     'lxreport.json': {
       validateContent: true,
       content: {
@@ -335,9 +334,6 @@ async function init () {
     .forEach(([filename, { validateContent = false, content }]) => {
       // @ts-ignore
       if (validateContent === true) validateDocument(content, filename)
-        .catch(error => {
-          console.error(error)
-        })
       write(filename, JSON.stringify(content, null, 2) + '\n')
     })
 
@@ -346,7 +342,7 @@ async function init () {
 
   console.log('\nDone. Now run:\n')
   if (root !== cwd) {
-    console.log(`  cd ${path.relative(cwd, root)}`)
+    console.log(`  cd ${relative(cwd, root)}`)
   }
   switch (pkgManager) {
     case 'yarn':
@@ -362,11 +358,11 @@ async function init () {
 }
 
 function copy (src, dest) {
-  const stat = fs.statSync(src)
+  const stat = statSync(src)
   if (stat.isDirectory()) {
     copyDir(src, dest)
   } else {
-    fs.copyFileSync(src, dest)
+    copyFileSync(src, dest)
   }
 }
 
@@ -386,32 +382,27 @@ function toValidPackageName (projectName) {
 }
 
 function copyDir (srcDir, destDir) {
-  fs.mkdirSync(destDir, { recursive: true })
-  for (const file of fs.readdirSync(srcDir)) {
-    const srcFile = path.resolve(srcDir, file)
-    const destFile = path.resolve(destDir, file)
+  mkdirSync(destDir, { recursive: true })
+  for (const file of readdirSync(srcDir)) {
+    const srcFile = resolve(srcDir, file)
+    const destFile = resolve(destDir, file)
     copy(srcFile, destFile)
   }
 }
 
-function isEmpty (path) {
-  return fs.readdirSync(path).length === 0
-}
+const isEmpty = path => readdirSync(path).length === 0
 
 function emptyDir (dir) {
-  if (!fs.existsSync(dir)) {
-    return
-  }
-  for (const file of fs.readdirSync(dir)) {
-    const abs = path.resolve(dir, file)
-    // baseline is Node 12 so can't use rmSync :(
-    if (fs.lstatSync(abs).isDirectory()) {
-      emptyDir(abs)
-      fs.rmdirSync(abs)
-    } else {
-      fs.unlinkSync(abs)
-    }
-  }
+  if (!existsSync(dir)) return
+  readdirSync(dir)
+    .forEach(file => {
+      const abs = resolve(dir, file)
+      // baseline is Node 12 so can't use rmSync :(
+      if (lstatSync(abs).isDirectory()) {
+        emptyDir(abs)
+        rmdirSync(abs)
+      } else unlinkSync(abs)
+    })
 }
 
 /**
@@ -422,12 +413,41 @@ function pkgFromUserAgent (userAgent) {
   if (!userAgent) return undefined
   const pkgSpec = userAgent.split(' ')[0]
   const pkgSpecArr = pkgSpec.split('/')
-  return {
-    name: pkgSpecArr[0],
-    version: pkgSpecArr[1]
-  }
+  return { name: pkgSpecArr[0], version: pkgSpecArr[1] }
 }
 
-init().catch((e) => {
-  console.error(e)
+const getCliOptions = () => ({
+  template: {
+    description: 'The template to be used',
+    alias: 't'
+  },
+  reportId: {
+    description: 'Unique id for this report in Java package notation (e.g. net.leanix.barcharts)'
+  },
+  author: {
+    description: 'Who is the author of this report (e.g. LeanIX GmbH <support@leanix.net>)'
+  },
+  title: {
+    description: 'A title to be shown in LeanIX when report is installed'
+  },
+  description: {
+    description: 'Description of your project'
+  },
+  host: {
+    description: 'Which host do you want to work with?'
+  },
+  apitoken: {
+    description: 'API-Token for Authentication (see: https://dev.leanix.net/docs/authentication#section-generate-api-tokens)'
+  },
+  proxyURL: {
+    description: 'Are you behind a proxy? Enter its URL here.'
+  }
 })
+
+// eslint-disable-next-line no-unused-expressions
+yargs(hideBin(process.argv))
+  .usage('Usage: $0 [targetDir] [options]')
+  .command('* [targetDir] [options]', 'the default command', () => { }, argv => init(argv).catch(e => console.error(e)))
+  .positional('targetDir', { describe: 'The folder in which the project will be created' })
+  .options(getCliOptions())
+  .argv

@@ -77,9 +77,17 @@ test('asks to overwrite non-empty current directory', t => {
 })
 
 test.serial('successfully scaffolds a project based on vue starter template', async t => {
-  const { stdout, stderr } = run([projectName, '--template', 'vue'], {
-    cwd: __dirname
-  })
+  const args = [
+    '--template', 'vue',
+    '---reportId', 'net.leanix.report',
+    '--author', 'LeanIX GmbH',
+    '--title', 'Report Title',
+    '--description', 'Report Description',
+    '--host', 'app.leanix.net',
+    '--apitoken', 'apitoken',
+    '--proxyURL', 'iojfowjio'
+  ]
+  const { stdout, stderr } = run([projectName, ...args], { cwd: __dirname })
 
   const generatedFiles = getAllFiles(genPath).sort()
 

@@ -29,6 +29,7 @@ export type CustomReportProjectBundle = ReadStream
 export interface LeanIXCredentials {
   host: LeanIXHost
   apitoken: LeanIXApiToken
+  proxyURL?: string
 }
 
 export interface AccessToken {

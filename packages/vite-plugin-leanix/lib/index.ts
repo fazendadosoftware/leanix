@@ -65,7 +65,8 @@ const leanixPlugin = (options?: LeanIXPluginOptions): LeanIXPlugin => {
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           if (claims !== null) logger?.info(`🔥 Your workspace is ${claims.principal.permission.workspaceName}`)
         } catch (err) {
-          logger?.error(err === 401 ? '💥 Invalid LeanIX API token' : err)
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          logger?.error(err === 401 ? '💥 Invalid LeanIX API token' : `${err}`)
           process.exit(1)
         }
       }
@@ -93,9 +94,9 @@ const leanixPlugin = (options?: LeanIXPluginOptions): LeanIXPlugin => {
       let metadata: CustomReportMetadata | undefined
       try {
         metadata = await readMetadataJson(metadataFilePath)
-      } catch (err) {
+      } catch (err: any) {
         const errors: ValidationError[] | undefined = err.errors
-        if (err.code === 'ENOENT') {
+        if (err?.code === 'ENOENT') {
           const path: string = err.path
           logger?.error(`💥 Could not find metadata file at "${path}"`)
           logger?.warn('🙋 Have you initialized this project?"')
