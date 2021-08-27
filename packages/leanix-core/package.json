@@ -1,6 +1,6 @@
 {
   "name": "@fazendadosoftware/leanix-core",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Library with core functionality for interfacing with LeanIX Custom Report API",
   "main": "dist/index.js",
   "module": "dist/esm/index.js",
@@ -8,7 +8,7 @@
   "files": [
     "dist"
   ],
-  "license": "Apache-2.0",
+  "license": "MIT",
   "keywords": [],
   "scripts": {
     "build": "npm run generateSchema && rollup -c rollup.config.js",

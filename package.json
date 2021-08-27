@@ -28,7 +28,8 @@
     "eslint-define-config": "^1.0.9",
     "eslint-plugin-import": "^2.24.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.1.0"
+    "eslint-plugin-promise": "^5.1.0",
+    "ts-node": "^10.2.1"
   },
   "ava": {
     "files": [
