@@ -1,4 +1,4 @@
-# create-leanix
+# create-lxr
 
 ## Scaffolding Your First LeanIX Custom Report
 
@@ -8,19 +8,19 @@
 With NPM:
 
 ```bash
-$ npm init leanix@latest
+$ npm init lxr@latest
 ```
 
 With Yarn:
 
 ```bash
-$ yarn create leanix
+$ yarn create lxr
 ```
 
 With PNPM:
 
 ```bash
-$ pnpx create-leanix
+$ pnpx create-lxr
 ```
 
 Then follow the prompts!
@@ -29,16 +29,16 @@ You can also directly specify the project name and the template you want to use 
 
 ```bash
 # npm 6.x
-npm init leanix@latest my-custom-report --template vue
+npm init lxr@latest my-custom-report --template vue
 
 # npm 7+, extra double-dash is needed:
-npm init leanix@latest my-custom-report -- --template vue
+npm init lxr@latest my-custom-report -- --template vue
 
 # yarn
-yarn create leanix my-custom-report --template vue
+yarn create lxr my-custom-report --template vue
 
 # pnpm
-pnpx create-leanix my-custom-report --template vue
+pnpx create-lxr my-custom-report --template vue
 ```
 
 Currently supported template presets include:
