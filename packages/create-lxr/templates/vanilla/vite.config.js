@@ -1,6 +1,6 @@
 // @ts-check
 import { defineConfig } from 'vite'
-import leanix from '@fazendadosoftware/vite-plugin-leanix'
+import leanix from '@fazendadosoftware/vite-plugin-lxr'
 
 // https://vitejs.dev/config/
 export default defineConfig({

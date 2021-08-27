@@ -9,7 +9,7 @@ const log = console.log
   const templateDir = join('..', 'templates')
   const templates = readdirSync(join(__dirname, templateDir))
 
-  const currentLeanIXVitePluginVersion = require('../../vite-plugin-leanix/package.json').version
+  const currentLeanIXVitePluginVersion = require('../../vite-plugin-lxr/package.json').version
 
   for (const templateName of templates) {
     const pkgPath = join(__dirname, templateDir, templateName, 'package.json')
@@ -42,9 +42,9 @@ const log = console.log
         }
       }
     }
-    if (pkg.devDependencies['@fazendadosoftware/vite-plugin-leanix'] !== `^${currentLeanIXVitePluginVersion}`) {
-      pkg.devDependencies['@fazendadosoftware/vite-plugin-leanix'] = currentLeanIXVitePluginVersion
-      updates.push(`➕  Added ${green.bold('@fazendadosoftware/vite-plugin-leanix')} ^${currentLeanIXVitePluginVersion} to ${bold('devDependencies')}`)
+    if (pkg.devDependencies['@fazendadosoftware/vite-plugin-lxr'] !== `^${currentLeanIXVitePluginVersion}`) {
+      pkg.devDependencies['@fazendadosoftware/vite-plugin-lxr'] = currentLeanIXVitePluginVersion
+      updates.push(`➕  Added ${green.bold('@fazendadosoftware/vite-plugin-lxr')} ^${currentLeanIXVitePluginVersion} to ${bold('devDependencies')}`)
     }
     if (updates.length > 0) writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
 

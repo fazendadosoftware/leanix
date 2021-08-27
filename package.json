@@ -15,7 +15,7 @@
     "lint": "eslint packages/*",
     "fix": "eslint packages/* --fix",
     "clean": "rimraf \"packages/**/dist\" \"**/*.tsbuildinfo\" \"**/*.tgz\" \"**/.temp\" \"**/.rollup.cache\"",
-    "build": "npm run build -w=@fazendadosoftware/leanix-core && npm run build -w=@fazendadosoftware/vite-plugin-leanix",
+    "build": "npm run build -w=@fazendadosoftware/leanix-core && npm run build -w=@fazendadosoftware/vite-plugin-lxr",
     "dev": "npm run dev -w=@fazendadosoftware/custom-report-vite-demo",
     "test": "ava",
     "publish": "npm run clean && npm run build && npm run test && npm publish --access=public --workspaces"

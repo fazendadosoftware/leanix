@@ -36,7 +36,7 @@ const leanixPlugin = (options?: LeanIXPluginOptions): LeanIXPlugin => {
   let isProduction: boolean = false
 
   return {
-    name: 'vite-plugin-leanix',
+    name: 'vite-plugin-lxr',
     enforce: 'post',
     devServerUrl: null,
     launchUrl: null,

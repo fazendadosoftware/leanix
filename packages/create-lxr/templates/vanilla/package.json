@@ -8,7 +8,7 @@
   },
   "devDependencies": {
     "vite": "^2.5.1",
-    "@fazendadosoftware/vite-plugin-leanix": "0.1.5"
+    "@fazendadosoftware/vite-plugin-lxr": "0.1.5"
   },
   "dependencies": {
     "@leanix/reporting": "^0.4.87"
