@@ -1,6 +1,6 @@
 {
   "name": "create-leanix",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "license": "MIT",
   "author": "Paulo dos Santos",
   "bin": {
@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/fazendadosoftware/leanix/tree/main/packages/create-leanix#readme",
   "dependencies": {
+    "@fazendadosoftware/leanix-core": "^0.1.4",
     "@types/yargs": "^17.0.2",
     "chalk": "^4.1.2",
     "kolorist": "^1.5.0",
