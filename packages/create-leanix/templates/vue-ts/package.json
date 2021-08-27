@@ -2,9 +2,9 @@
   "name": "vite-vue-typescript-starter",
   "version": "0.0.0",
   "scripts": {
-    "serve": "vite",
-    "upload": "vue-tsc --noEmit && vite build",
-    "build": "vue-tsc --noEmit && vite build --mode development"
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build --mode development",
+    "upload": "vue-tsc --noEmit && vite build"
   },
   "dependencies": {
     "vue": "^3.2.6",

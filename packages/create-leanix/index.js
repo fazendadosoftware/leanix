@@ -184,7 +184,7 @@ async function init (argv) {
   // leanix-specific answers
   let { reportId, author, title, description, host, apitoken, proxyURL } = argv
 
-  const defaultProjectName = targetDir ?? 'vite-project'
+  const defaultProjectName = targetDir ?? 'leanix-custom-report'
 
   let result = {}
   /*

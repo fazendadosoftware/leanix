@@ -1,6 +1,6 @@
 {
   "name": "create-leanix",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "license": "MIT",
   "author": "Paulo dos Santos",
   "bin": {

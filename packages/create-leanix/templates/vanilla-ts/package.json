@@ -2,9 +2,9 @@
   "name": "vite-typescript-starter",
   "version": "0.0.0",
   "scripts": {
-    "serve": "vite",
-    "upload": "tsc && vite build",
-    "build": "tsc && vite build --mode development"
+    "dev": "vite",
+    "build": "tsc && vite build --mode development",
+    "upload": "tsc && vite build"
   },
   "devDependencies": {
     "typescript": "^4.3.5",

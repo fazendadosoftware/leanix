@@ -2,9 +2,9 @@
   "name": "vite-starter",
   "version": "0.0.0",
   "scripts": {
-    "serve": "vite",
-    "upload": "vite build",
-    "build": "vite build --mode development"
+    "dev": "vite",
+    "build": "vite build --mode development",
+    "upload": "vite build"
   },
   "devDependencies": {
     "vite": "^2.5.1",
