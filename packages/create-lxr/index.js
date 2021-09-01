@@ -14,10 +14,7 @@ const prompts = require('prompts')
 const {
   yellow,
   green,
-  cyan,
   blue,
-  magenta,
-  lightRed,
   red
 } = require('kolorist')
 
@@ -187,18 +184,6 @@ async function init (argv) {
   const defaultProjectName = targetDir ?? 'leanix-custom-report'
 
   let result = {}
-  /*
-  prompts.inject([
-    'the report id',
-    'the author',
-    'the title',
-    'the description',
-    'the host...',
-    'the token...',
-    true,
-    'the proxy'
-  ])
-  */
   try {
     result = await prompts(
       [
@@ -309,25 +294,23 @@ async function init (argv) {
 
   const pkg = require(join(templateDir, 'package.json'))
 
+  const leanixReport = {
+    id: reportId,
+    author,
+    title,
+    description,
+    defaultConfig: {}
+  }
+
+  validateDocument(leanixReport, 'lxreport.json')
+
   const reportName = packageName || targetDir
   pkg.name = reportName
+  pkg.leanixReport = leanixReport
 
   const generatedFiles = {
     'package.json': { content: pkg },
-    'lxr.json': { validateContent: true, content: { host, apitoken, proxyURL } },
-    'lxreport.json': {
-      validateContent: true,
-      content: {
-        id: reportId,
-        name: reportName,
-        version: pkg.version,
-        author,
-        title,
-        description,
-        documentationLink: '',
-        defaultConfig: {}
-      }
-    }
+    'lxr.json': { validateContent: true, content: { host, apitoken, proxyURL } }
   }
 
   Object.entries(generatedFiles)

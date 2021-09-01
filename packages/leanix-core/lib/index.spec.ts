@@ -12,7 +12,7 @@ const getDummyReportMetadata = (): CustomReportMetadata => ({
   version: '0.1.0',
   description: 'Custom Report Description',
   author: 'John Doe',
-  documentationLink: 'https://www.google.com',
+  // documentationLink: 'https://www.google.com',
   defaultConfig: {}
 })
 
@@ -25,7 +25,6 @@ test('validate "lxr.json" and "lxreport.json" against document schemas', async t
 
   await t.notThrowsAsync(validateDocument({ host: 'app.leanix.net', apitoken: 'token' }, 'lxr.json'))
   await t.throwsAsync(validateDocument({ host: 'app.leanix.net' }, 'lxr.json'))
-  
 })
 
 test('getAccessToken returns a token', async t => {

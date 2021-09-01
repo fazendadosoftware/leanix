@@ -79,13 +79,11 @@ test('plugin creates bundle file "bundle.tgz" when building', async t => {
     mkdirSync(path, { recursive: true })
   })
 
-  // Create metadata file
-  const metadataFilePath = `${testBaseDir}/lxreport.json`
-  writeFileSync(metadataFilePath, JSON.stringify(getDummyReportMetadata(), null, 2))
-
+  const { name, version, ...leanixReport } = getDummyReportMetadata()
   const projectFiles = {
     'index.js': 'console.log("hello world")',
-    'index.html': '<html><body>Hello world<script type="module" src="./index.js"></script></body></html>'
+    'index.html': '<html><body>Hello world<script type="module" src="./index.js"></script></body></html>',
+    'package.json': JSON.stringify({ name, version, leanixReport })
   }
 
   Object.entries(projectFiles)
@@ -97,7 +95,7 @@ test('plugin creates bundle file "bundle.tgz" when building', async t => {
   const output: any = await build({
     root: folders.srcDir,
     build: { outDir: folders.outDir, assetsDir: assetsFolder },
-    plugins: [leanixPlugin({ metadataFilePath })]
+    plugins: [leanixPlugin({ packageJsonPath: resolve(folders.srcDir, 'package.json') })]
   })
 
   const chunk = output?.output.find((t: any) => t?.type === 'chunk')
@@ -128,10 +126,12 @@ test('plugin creates bundle file "bundle.tgz" when building', async t => {
   t.true(assetDirectory !== undefined, `bundle includes asset directory "/${assetsFolder}"`)
   const indexHtmlFile = bundleFiles.find(({ path, type }) => type === 'File' && path === 'index.html')
   t.true(indexHtmlFile !== undefined, 'bundle includes file "index.html"')
-  const metadataJsonFile = bundleFiles.find(({ path, type }) => type === 'File' && path === 'lxreport.json')
-  t.true(metadataJsonFile !== undefined, 'bundle includes json metadata file "lxreport.json"')
+  const metadataJsonFile = bundleFiles.find(({ path, type }) => type === 'File' && path === 'package.json')
+  t.true(metadataJsonFile !== undefined, 'bundle includes file "package.json"')
   const assetFile = bundleFiles.find(({ path, type }) => type === 'File' && path === `${assetsFolder}/${assetFilename}`)
   t.true(assetFile !== undefined, `bundle includes generated asset file "${assetsFolder}/${assetFilename}"`)
+
+  // TODO: READ PACKAGE JSON AND CHECK METADATA
 
   Object.values(folders).forEach(path => rmdirSync(path, { recursive: true }))
 })

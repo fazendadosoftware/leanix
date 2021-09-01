@@ -90,10 +90,13 @@ export const readLxrJson = async (path?: string): Promise<LeanIXCredentials> => 
   return credentials
 }
 
-export const readMetadataJson = async (path: string = `${process.cwd()}/lxreport.json`): Promise<CustomReportMetadata> => {
+export const readMetadataJson = async (path: string = `${process.cwd()}/package.json`): Promise<CustomReportMetadata> => {
   const fileContent = readFileSync(path).toString()
   const parsedContent = JSON.parse(fileContent)
-  await validateDocument(parsedContent, 'lxreport.json')
+  if (parsedContent.leanixReport === 'undefined') throw Error('💥 could not find leanixReport attribute in package.json...')
+  const { name, version, leanixReport = {} } = parsedContent
+  const metadata = { name, version, ...leanixReport }
+  await validateDocument(metadata, 'lxreport.json')
   return parsedContent
 }
 

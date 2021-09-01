@@ -24,13 +24,12 @@ interface LeanIXPlugin extends Plugin {
 }
 
 interface LeanIXPluginOptions {
-  metadataFilePath?: string
+  packageJsonPath?: string
 }
 
-const leanixPlugin = (options?: LeanIXPluginOptions): LeanIXPlugin => {
+const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
   let logger: Logger
   let open: string | boolean = false
-  const metadataFilePath = options?.metadataFilePath ?? `${process.cwd()}/lxreport.json`
   let accessToken: AccessToken | null = null
   let claims: JwtClaims | null = null
   let isProduction: boolean = false
@@ -93,7 +92,7 @@ const leanixPlugin = (options?: LeanIXPluginOptions): LeanIXPlugin => {
     async writeBundle (options, outputBundle) {
       let metadata: CustomReportMetadata | undefined
       try {
-        metadata = await readMetadataJson(metadataFilePath)
+        metadata = await readMetadataJson(pluginOptions?.packageJsonPath)
       } catch (err: any) {
         const errors: ValidationError[] | undefined = err.errors
         if (err?.code === 'ENOENT') {
@@ -101,10 +100,10 @@ const leanixPlugin = (options?: LeanIXPluginOptions): LeanIXPlugin => {
           logger?.error(`💥 Could not find metadata file at "${path}"`)
           logger?.warn('🙋 Have you initialized this project?"')
         } else if (Array.isArray(errors)) {
-          logger?.error(`💥 Invalid metadata file "${metadataFilePath}"`)
+          // logger?.error(`💥 Invalid metadata file "${metadataFilePath}"`)
           errors.forEach(error => {
             const message: string = error.message
-            logger?.error(`🥺 "lxrreport.json" ${message}`)
+            logger?.error(`🥺 "package.json -> leanixReport" ${message}`)
           })
         }
         process.exit(1)

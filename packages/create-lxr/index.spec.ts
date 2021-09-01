@@ -35,8 +35,8 @@ const getAllFiles = (dirPath: string, arrayOfFiles: string[] = []): string[] => 
   return arrayOfFiles
 }
 
-// Vue 3 starter template plus 2 leanix-specific generated files: 'lxr.json' and 'lxreport.json'
-const templateFiles = [...getAllFiles(join(CLI_PATH, 'templates', 'vue')), 'lxreport.json', 'lxr.json']
+// Vue 3 starter template plus 1 generated file: 'lxr.json'
+const templateFiles = [...getAllFiles(join(CLI_PATH, 'templates', 'vue')), 'lxr.json']
   .map(file => file === '_gitignore' ? '.gitignore' : file)
   .sort()
 
