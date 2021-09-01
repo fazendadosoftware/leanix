@@ -16,14 +16,11 @@
   "scripts": {
     "build": "rollup -c rollup.config.js"
   },
-  "dependencies": {
-    "@fazendadosoftware/leanix-core": "^0.1.0",
-    "chalk": "^4.1.2",
-    "execa": "^5.1.1",
-    "open": "^8.2.1",
-    "vite": "^2.5.1"
+  "peerDependencies": {
+    "vite": "^2.0.0"
   },
   "devDependencies": {
+    "vite": "^2.0.0",
     "@types/node": "^14.11.2",
     "rollup": "^2.56.3",
     "tar": "^6.1.10",

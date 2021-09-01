@@ -18,10 +18,6 @@
             "title": "description",
             "type": "string"
         },
-        "documentationLink": {
-            "title": "documentationLink",
-            "type": "string"
-        },
         "id": {
             "title": "id",
             "type": "string"
@@ -47,7 +43,6 @@
         "author",
         "defaultConfig",
         "description",
-        "documentationLink",
         "id",
         "name",
         "title",

@@ -15,8 +15,7 @@ import {
   ValidationError,
   CustomReportProjectBundle,
   JwtClaims
-} from '@fazendadosoftware/leanix-core'
-import { openBrowser } from './openBrowser'
+} from '../../leanix-core/lib/index'
 
 interface LeanIXPlugin extends Plugin {
   devServerUrl: string | null
@@ -85,7 +84,6 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
               logger?.info(`🚀 Your development server is available here => ${this.launchUrl}`)
             }, 1)
           } else throw Error('💥 Could not get launch url, no accessToken...')
-          if (open !== false) openBrowser(this.launchUrl, open, logger)
         })
       }
     },
@@ -119,15 +117,16 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
         try {
           const result = await uploadBundle(bundle, accessToken.accessToken)
           if (result.status === 'ERROR') {
-            logger?.error('💥 Error while uploading project to workpace, check your "lxreport.json" file:')
+            logger?.error('💥 Error while uploading project to workpace, check your "lxreport.json" file...')
             logger?.error(JSON.stringify(result, null, 2))
             process.exit(1)
           }
           const { id, version } = metadata
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           if (claims !== null) logger?.info(`🥳 Report "${id}" with version "${version}" was uploaded to workspace "${claims.principal.permission.workspaceName}"!`)
-        } catch (err) {
-          logger?.error(`💥 ${JSON.stringify(err)}`)
+        } catch (err: any) {
+          logger?.error('💥 Error while uploading project to workpace...')
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          logger?.error(`💣 ${err}`)
           process.exit(1)
         }
       } else if (!isProduction) {

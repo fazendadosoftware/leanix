@@ -22,7 +22,6 @@ type ReportTitle = string
 type ReportVersion = string
 type ReportDescription = string
 type ReportAuthor = string
-type ReportDocumentationLink = string
 type ReportConfig = object
 export type CustomReportProjectBundle = ReadStream
 
@@ -57,7 +56,6 @@ export interface CustomReportMetadata {
   version: ReportVersion
   author: ReportAuthor
   description: ReportDescription
-  documentationLink: ReportDocumentationLink
   defaultConfig: ReportConfig
 }
 
@@ -97,7 +95,7 @@ export const readMetadataJson = async (path: string = `${process.cwd()}/package.
   const { name, version, leanixReport = {} } = parsedContent
   const metadata = { name, version, ...leanixReport }
   await validateDocument(metadata, 'lxreport.json')
-  return parsedContent
+  return metadata
 }
 
 export const getAccessToken = async (credentials: LeanIXCredentials): Promise<AccessToken> => {
@@ -178,7 +176,17 @@ export const uploadBundle = async (bundle: CustomReportProjectBundle, bearerToke
   const form = new FormData()
   form.append('file', bundle)
   const reportResponseData: ReportUploadResponseData = await fetch(url, { method: 'post', headers, body: form })
-    .then(async res => await res.json())
+    .then(async res => {
+      const contentType: string | null = res.headers.get('content-type')
+      const content = contentType === 'text/plain'
+        ? await res.text()
+        : contentType === 'application/json'
+          ? await res.json()
+          : null
+      if (content === null) throw Error(`status ${res.status}, unknown content type ${contentType ?? 'null'}`)
+      if (!res.ok) throw Error(JSON.stringify({ status: res.status, message: content }))
+      return content
+    })
   return reportResponseData
 }
 

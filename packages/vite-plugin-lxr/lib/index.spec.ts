@@ -4,7 +4,7 @@ import { resolve } from 'path'
 import { writeFileSync, rmdirSync, existsSync, mkdirSync, readdirSync, createReadStream } from 'fs'
 import { ReadEntry, t as tarT } from 'tar'
 import { v4 as uuid } from 'uuid'
-import { CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, readLxrJson, getAccessToken, AccessToken } from '@fazendadosoftware/leanix-core'
+import { CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, readLxrJson, getAccessToken, AccessToken } from '../../leanix-core/lib/index'
 import leanixPlugin from './index'
 
 const tmpDir = resolve(__dirname, '../.temp')
@@ -16,7 +16,6 @@ const getDummyReportMetadata = (): CustomReportMetadata => ({
   version: '0.1.0',
   description: 'Custom Report Description',
   author: 'John Doe',
-  documentationLink: 'https://www.google.com',
   defaultConfig: {}
 })
 
@@ -118,7 +117,7 @@ test('plugin creates bundle file "bundle.tgz" when building', async t => {
     const entries: ReadEntry[] = []
     fileStream.on('open', () => fileStream.pipe(tarT()).on('entry', entry => entries.push(entry)))
     fileStream.on('error', err => reject(err))
-    fileStream.on('end', () => resolve(entries))
+    fileStream.on('end', () => { resolve(entries) })
   })
 
   t.is(bundleFiles.length, 4, 'bundle file has 4 entries')
@@ -126,12 +125,10 @@ test('plugin creates bundle file "bundle.tgz" when building', async t => {
   t.true(assetDirectory !== undefined, `bundle includes asset directory "/${assetsFolder}"`)
   const indexHtmlFile = bundleFiles.find(({ path, type }) => type === 'File' && path === 'index.html')
   t.true(indexHtmlFile !== undefined, 'bundle includes file "index.html"')
-  const metadataJsonFile = bundleFiles.find(({ path, type }) => type === 'File' && path === 'package.json')
-  t.true(metadataJsonFile !== undefined, 'bundle includes file "package.json"')
+  const metadataJsonFile = bundleFiles.find(({ path, type }) => type === 'File' && path === 'lxreport.json')
+  t.true(metadataJsonFile !== undefined, 'bundle includes metadata file "lxreport.json"')
   const assetFile = bundleFiles.find(({ path, type }) => type === 'File' && path === `${assetsFolder}/${assetFilename}`)
   t.true(assetFile !== undefined, `bundle includes generated asset file "${assetsFolder}/${assetFilename}"`)
-
-  // TODO: READ PACKAGE JSON AND CHECK METADATA
 
   Object.values(folders).forEach(path => rmdirSync(path, { recursive: true }))
 })
