@@ -3,9 +3,6 @@
 // @ts-check
 const { existsSync, mkdirSync, writeFileSync, readdirSync, lstatSync, rmdirSync, unlinkSync, statSync, copyFileSync } = require('fs')
 const { join, resolve, relative } = require('path')
-// Avoids autoconversion to number of the project name by defining that the args
-// non associated with an option ( _ ) needs to be parsed as a string. See #4606
-// const argv = require('minimist')(process.argv.slice(2), { string: ['_'] })
 
 const yargs = require('yargs/yargs')
 const { hideBin } = require('yargs/helpers')
@@ -18,7 +15,7 @@ const {
   red
 } = require('kolorist')
 
-const { validateDocument } = require('@fazendadosoftware/leanix-core')
+const { validateDocument } = require('../leanix-core/dist')
 
 const cwd = process.cwd()
 
