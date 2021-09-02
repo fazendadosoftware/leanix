@@ -5,7 +5,7 @@
     "outDir": "dist",
     "composite": false,
     "declaration": false,
-    "sourceMap": false,
+    "sourceMap": true,
     // https://stackoverflow.com/questions/61687679/nest-js-build-does-does-not-generate-the-dist-folder
     "incremental": false,
     "noEmit": false

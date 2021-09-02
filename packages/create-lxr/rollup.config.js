@@ -5,6 +5,7 @@ import commonjs from '@rollup/plugin-commonjs'
 import { terser } from 'rollup-plugin-terser'
 import summary from 'rollup-plugin-summary'
 import copy from 'rollup-plugin-copy'
+import shebang from 'rollup-plugin-preserve-shebang'
 import pkg from './package.json'
 
 const moduleName = pkg.name.replace(/^@.*\//, '')
@@ -29,18 +30,19 @@ export default [
       {
         dir: 'dist/',
         format: 'cjs',
-        sourcemap: false,
+        sourcemap: true,
         banner,
         exports: 'auto'
       }
     ],
     external: [
-      ...Object.keys(pkg.dependencies || {}),
-      ...Object.keys(pkg.devDependencies || {})
+      // ...Object.keys(pkg.dependencies || {}),
+      // ...Object.keys(pkg.devDependencies || {})
     ],
     plugins: [
       copy({ targets: [{ src: 'templates', dest: 'dist/' }] }),
-      typescript({ outputToFilesystem: false }),
+      shebang(),
+      typescript({ declaration: false, outputToFilesystem: false }),
       json({ compact: true }),
       nodeResolve({ preferBuiltins: true }),
       commonjs(),

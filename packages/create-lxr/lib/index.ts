@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { existsSync, mkdirSync, writeFileSync, readdirSync, lstatSync, rmdirSync, unlinkSync, statSync, copyFileSync } from 'fs'
 import { join, resolve, relative } from 'path'
 import yargs from 'yargs'
