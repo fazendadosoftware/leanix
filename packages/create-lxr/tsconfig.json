@@ -4,10 +4,11 @@
     "rootDir": "lib",
     "outDir": "dist",
     "composite": false,
+    "declaration": false,
+    "sourceMap": false,
     // https://stackoverflow.com/questions/61687679/nest-js-build-does-does-not-generate-the-dist-folder
     "incremental": false,
     "noEmit": false
   },
-  "include": ["lib"],
-  "exclude": [ "**/*.spec.ts"]
+  "exclude": ["**/*.spec.ts", "templates/**/*", "dist"]
 }

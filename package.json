@@ -15,9 +15,10 @@
     "lint": "eslint packages/*",
     "fix": "eslint packages/* --fix",
     "clean": "rimraf \"packages/**/dist\" \"**/*.tsbuildinfo\" \"**/*.tgz\" \"**/.temp\" \"**/.rollup.cache\"",
-    "build": "npm run build:core && npm run build:plugin",
+    "build": "npm run build:core && npm run build:plugin && npm run build:create-lxr",
     "build:core": "npm run build -w=@fazendadosoftware/leanix-core",
-    "build:plugin": "npm run build -w=@fazendadosoftware/vite-plugin-lxr",
+    "build:vite-plugin": "npm run build -w=@fazendadosoftware/vite-plugin-lxr",
+    "build:create-lxr": "npm run build -w=create-lxr",
     "dev": "npm run dev -w=@fazendadosoftware/custom-report-vite-demo",
     "test": "ava",
     "publish": "npm run clean && npm run build && npm run test && npm publish --access=public --workspaces"
@@ -30,8 +31,7 @@
     "eslint-define-config": "^1.0.9",
     "eslint-plugin-import": "^2.24.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.1.0",
-    "ts-node": "^10.2.1"
+    "eslint-plugin-promise": "^5.1.0"
   },
   "ava": {
     "files": [
