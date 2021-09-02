@@ -36,10 +36,6 @@
     "eslint-plugin-promise": "^5.1.0",
     "husky": "^7.0.0"
   },
-  "gitHooks": {
-    "pre-commit": "npm run build && npm run test",
-    "commit-msg": "node scripts/verifyCommit.js"
-  },
   "ava": {
     "files": [
       "packages/**/*.spec.ts"
