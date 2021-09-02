@@ -4,11 +4,7 @@ import { mkdirpSync, readdirSync, remove, writeFileSync, statSync } from 'fs-ext
 import { join, resolve } from 'path'
 import pkg from '../package.json'
 
-const binaries: Record<string, string> = pkg.bin
-const CLI_PATH = resolve(__dirname, '..', binaries[pkg.name])
-console.log(CLI_PATH, __dirname)
-
-// const CLI_PATH = join(__dirname, '.')
+const CLI_PATH = resolve(__dirname, '..', pkg.bin)
 
 const projectName = 'test-app'
 const genPath = join(__dirname, projectName)

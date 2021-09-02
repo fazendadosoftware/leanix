@@ -1,21 +1,22 @@
 {
   "name": "@fazendadosoftware/leanix-projects",
-  "version": "0.1.0",
   "private": true,
-  "description": "Collection of projects developed for LeanIX",
+  "workspaces": [
+    "./packages/*"
+  ],
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "author": {
     "name": "Paulo dos Santos",
     "email": "paulo@fazendadosoftware.com"
   },
   "license": "MIT",
-  "workspaces": [
-    "./packages/*"
-  ],
   "scripts": {
     "lint": "eslint packages/*",
     "fix": "eslint packages/* --fix",
     "clean": "rimraf \"packages/**/dist\" \"**/*.tsbuildinfo\" \"**/*.tgz\" \"**/.temp\" \"**/.rollup.cache\"",
-    "build": "npm run build:core && npm run build:plugin && npm run build:create-lxr",
+    "build": "npm run build:core && npm run build:vite-plugin && npm run build:create-lxr",
     "build:core": "npm run build -w=@fazendadosoftware/leanix-core",
     "build:vite-plugin": "npm run build -w=@fazendadosoftware/vite-plugin-lxr",
     "build:create-lxr": "npm run build -w=create-lxr",
@@ -32,6 +33,10 @@
     "eslint-plugin-import": "^2.24.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0"
+  },
+  "gitHooks": {
+    "pre-commit": "npm run build && npm run test",
+    "commit-msg": "node scripts/verifyCommit.js"
   },
   "ava": {
     "files": [
