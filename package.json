@@ -22,7 +22,8 @@
     "build:create-lxr": "npm run build -w=create-lxr",
     "dev": "npm run dev -w=@fazendadosoftware/custom-report-vite-demo",
     "test": "ava",
-    "publish": "npm run clean && npm run build && npm run test && npm publish --access=public --workspaces"
+    "publish": "npm run clean && npm run build && npm run test && npm publish --access=public --workspaces",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@types/node": "^14.11.2",
@@ -32,7 +33,8 @@
     "eslint-define-config": "^1.0.9",
     "eslint-plugin-import": "^2.24.1",
     "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.1.0"
+    "eslint-plugin-promise": "^5.1.0",
+    "husky": "^7.0.0"
   },
   "gitHooks": {
     "pre-commit": "npm run build && npm run test",
