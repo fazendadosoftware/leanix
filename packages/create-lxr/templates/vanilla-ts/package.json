@@ -7,9 +7,9 @@
     "upload": "tsc && vite build"
   },
   "devDependencies": {
-    "typescript": "^4.3.5",
-    "vite": "^2.5.1",
-    "@fazendadosoftware/vite-plugin-lxr": "0.0.0"
+    "typescript": "^4.4.2",
+    "vite": "^2.5.3",
+    "@fazendadosoftware/vite-plugin-lxr": "0.0.2"
   },
   "dependencies": {
     "@leanix/reporting": "^0.4.87"

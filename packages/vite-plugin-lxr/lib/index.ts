@@ -118,7 +118,7 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
         try {
           const result = await uploadBundle(bundle, accessToken.accessToken)
           if (result.status === 'ERROR') {
-            logger?.error('💥 Error while uploading project to workpace, check your "lxreport.json" file...')
+            logger?.error('💥 Error while uploading project to workpace, check your "package.json" file...')
             logger?.error(JSON.stringify(result, null, 2))
             process.exit(1)
           }
