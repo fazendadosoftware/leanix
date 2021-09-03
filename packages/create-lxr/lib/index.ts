@@ -5,7 +5,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import prompts from 'prompts'
 import { yellow, green, blue, red } from 'kolorist'
-import { validateDocument } from '@fazendadosoftware/leanix-core'
+import { validateDocument } from '@fazendadosoftware/lxr-core'
 
 const cwd = process.cwd()
 

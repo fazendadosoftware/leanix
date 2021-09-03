@@ -14,6 +14,6 @@
   },
   "exclude": [".git", "node_modules"],
   "references": [
-    { "path": "./packages/leanix-core"}
+    { "path": "./packages/lxr-core"}
   ]
 }

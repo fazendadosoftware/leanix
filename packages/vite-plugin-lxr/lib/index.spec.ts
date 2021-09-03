@@ -4,7 +4,7 @@ import { resolve } from 'path'
 import { writeFileSync, rmdirSync, existsSync, mkdirSync, readdirSync, createReadStream } from 'fs'
 import { ReadEntry, t as tarT } from 'tar'
 import { v4 as uuid } from 'uuid'
-import { CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, readLxrJson, getAccessToken, AccessToken } from '../../leanix-core/lib/index'
+import { CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, readLxrJson, getAccessToken, AccessToken } from '../../lxr-core/lib/index'
 import leanixPlugin from './index'
 
 const tmpDir = resolve(__dirname, '../.temp')
