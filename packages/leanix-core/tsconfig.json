@@ -6,5 +6,9 @@
   },
   "include": ["lib"],
   "exclude": ["**/*.spec.ts"],
-  "files": ["lib/schema/LeanIXCredentials.json", "lib/schema/CustomReportMetadata.json"],
+  "files": [
+    "lib/schema/LeanIXCredentials.json",
+    "lib/schema/CustomReportMetadata.json",
+    "lib/schema/PackageJsonLXR.json"
+  ],
 }

@@ -8,6 +8,7 @@ import { URL } from 'url'
 import { validate, ValidatorResult } from 'jsonschema'
 import LeanIXCredentialsSchema from './schema/LeanIXCredentials.json'
 import CustomReportMetadataSchema from './schema/CustomReportMetadata.json'
+import PackageJsonLXRSchema from './schema/PackageJsonLXR.json'
 
 export { validate, ValidationError, ValidatorResult } from 'jsonschema'
 
@@ -59,12 +60,26 @@ export interface CustomReportMetadata {
   defaultConfig: ReportConfig
 }
 
+export interface PackageJsonLXR {
+  name: string
+  version: string
+  description: string
+  author: string
+  leanixReport: {
+    id: string
+    title: string
+    defaultConfig: object
+  }
+}
+
 const snakeToCamel = (s: string): string => s.replace(/([-_]\w)/g, g => g[1].toUpperCase())
 
-// utility function for validating "lxr.json" and "lxreport.json" files
-export const validateDocument = async (document: any, name: 'lxr.json' | 'lxreport.json'): Promise<ValidatorResult> => {
+// utility function for validating "package.json", "lxr.json" and "lxreport.json" files
+export const validateDocument = async (document: any, name: 'lxr.json' | 'lxreport.json' | 'package.json'): Promise<ValidatorResult> => {
   let schema: any
   switch (name) {
+    case 'package.json':
+      schema = PackageJsonLXRSchema
     case 'lxr.json':
       schema = LeanIXCredentialsSchema
       break
@@ -90,10 +105,10 @@ export const readLxrJson = async (path?: string): Promise<LeanIXCredentials> => 
 
 export const readMetadataJson = async (path: string = `${process.cwd()}/package.json`): Promise<CustomReportMetadata> => {
   const fileContent = readFileSync(path).toString()
-  const parsedContent = JSON.parse(fileContent)
-  if (parsedContent.leanixReport === 'undefined') throw Error('💥 could not find leanixReport attribute in package.json...')
-  const { name, version, leanixReport = {} } = parsedContent
-  const metadata = { name, version, ...leanixReport }
+  const pkg: PackageJsonLXR = JSON.parse(fileContent)
+  await validateDocument(pkg, 'package.json')
+  const { name, version, author, description, leanixReport } = pkg
+  const metadata: CustomReportMetadata = { name, version, author, description, ...leanixReport }
   await validateDocument(metadata, 'lxreport.json')
   return metadata
 }

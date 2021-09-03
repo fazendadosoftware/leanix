@@ -319,22 +319,15 @@ async function init (argv: Options): Promise<void> {
   readdirSync(templateDir).filter(f => f !== 'package.json').forEach(file => write(file))
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const pkg = require(join(templateDir, 'package.json'))
+  let pkg = require(join(templateDir, 'package.json'))
 
   const reportName = packageName ?? targetDir
 
-  const leanixReport = {
-    id: reportId,
-    author,
-    title,
-    description,
-    defaultConfig: {}
-  }
+  const pkgMetadataFields = { name: reportName, author, description, version: pkg.version }
+  const leanixReport = { id: reportId, title, defaultConfig: {} }
 
-  await validateDocument({ ...leanixReport, name: reportName, version: pkg.version }, 'lxreport.json')
-
-  pkg.name = reportName
-  pkg.leanixReport = leanixReport
+  pkg = { ...pkg, ...pkgMetadataFields, leanixReport }
+  await validateDocument({ ...leanixReport, ...pkgMetadataFields }, 'lxreport.json')
 
   const lxrJson = { host, apitoken, proxyURL }
 
