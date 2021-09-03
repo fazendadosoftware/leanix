@@ -30,6 +30,7 @@ const deleteExistingReportInWorkspace = async (t: ExecutionContext | null, acces
   if (reportId !== null) {
     const status = await deleteWorkspaceReportById(reportId, accessToken.accessToken)
     if (status === 204) t?.log('Deleted existing report in workspace')
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     else t?.log(`Error deleting report in workspace. Got ${status}`)
   }
   return accessToken
@@ -78,11 +79,11 @@ test('plugin creates bundle file "bundle.tgz" when building', async t => {
     mkdirSync(path, { recursive: true })
   })
 
-  const { name, version, ...leanixReport } = getDummyReportMetadata()
+  const { name, author, description, version, ...leanixReport } = getDummyReportMetadata()
   const projectFiles = {
     'index.js': 'console.log("hello world")',
     'index.html': '<html><body>Hello world<script type="module" src="./index.js"></script></body></html>',
-    'package.json': JSON.stringify({ name, version, leanixReport })
+    'package.json': JSON.stringify({ name, version, author, description, leanixReport })
   }
 
   Object.entries(projectFiles)

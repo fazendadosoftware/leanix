@@ -6,6 +6,7 @@ import { terser } from 'rollup-plugin-terser'
 import summary from 'rollup-plugin-summary'
 import copy from 'rollup-plugin-copy'
 import shebang from 'rollup-plugin-preserve-shebang'
+import { normalize } from 'path'
 import pkg from './package.json'
 
 const moduleName = pkg.name.replace(/^@.*\//, '')
@@ -48,6 +49,12 @@ export default [
       commonjs(),
       terser({ module: true, warnings: true }),
       summary()
-    ]
+    ],
+    onwarn (warning) {
+      if (warning.code === 'CIRCULAR_DEPENDENCY' && warning.importer.includes(normalize('node_modules/yargs'))) {
+        return
+      }
+      console.warn(`(!) ${warning.message} ${warning.importer}`)
+    }
   }
 ]

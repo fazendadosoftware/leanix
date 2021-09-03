@@ -80,6 +80,7 @@ export const validateDocument = async (document: any, name: 'lxr.json' | 'lxrepo
   switch (name) {
     case 'package.json':
       schema = PackageJsonLXRSchema
+      break
     case 'lxr.json':
       schema = LeanIXCredentialsSchema
       break

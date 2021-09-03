@@ -28,7 +28,6 @@ interface LeanIXPluginOptions {
 
 const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
   let logger: Logger
-  let open: string | boolean = false
   let accessToken: AccessToken | null = null
   let claims: JwtClaims | null = null
   let isProduction: boolean = false
@@ -40,11 +39,9 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
     launchUrl: null,
     async config (config, env) {
       // server exposes host and runs in TLS + HTTPS2 mode
-      // we disable the open flag as the plugin will handle it
-      open = config.server?.open ?? false
       // required for serving the custom report files in LeanIX
       config.base = ''
-      config.server = { ...config.server ?? {}, https: true, host: true, open: false }
+      config.server = { ...config.server ?? {}, https: true, host: true }
     },
     async configResolved (resolvedConfig: ResolvedConfig) {
       isProduction = resolvedConfig.isProduction
@@ -100,8 +97,12 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
         } else if (Array.isArray(errors)) {
           // logger?.error(`💥 Invalid metadata file "${metadataFilePath}"`)
           errors.forEach(error => {
-            const message: string = error.message
-            logger?.error(`🥺 "package.json -> leanixReport" ${message}`)
+            const { schema, path, message } = error
+            const file = (schema === '/PackageJsonLXR' || path[0] === 'leanixReport')
+              ? 'package.json'
+              : 'lxreport.json'
+            const errPath = path.length > 0 ? ` property "${path.join('.')}" ` : ' '
+            logger?.error(`🥺 ${file}:${errPath}${message}`)
           })
         }
         process.exit(1)
