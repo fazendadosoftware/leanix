@@ -1,0 +1,19 @@
+{
+  "name": "vite-vue-starter",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build --mode development",
+    "upload": "vite build"
+  },
+  "dependencies": {
+    "vue": "^3.2.8",
+    "@leanix/reporting": "^0.4.87"
+  },
+  "devDependencies": {
+    "@fazendadosoftware/vite-plugin-lxr": "0.0.2",
+    "@vitejs/plugin-vue": "^1.6.0",
+    "@vue/compiler-sfc": "^3.2.8",
+    "vite": "^2.5.3"
+  }
+}

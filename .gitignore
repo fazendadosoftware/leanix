@@ -121,3 +121,8 @@ build
 
 .env
 tsconfig.tsbuildinfo
+dist
+.temp
+
+.rollup.cache
+lxr.json

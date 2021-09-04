@@ -1,46 +1,45 @@
 {
   "name": "@fazendadosoftware/leanix-projects",
-  "version": "0.1.0",
   "private": true,
-  "description": "",
+  "workspaces": [
+    "./packages/*"
+  ],
+  "engines": {
+    "node": ">=12.0.0"
+  },
   "author": {
     "name": "Paulo dos Santos",
     "email": "paulo@fazendadosoftware.com"
   },
   "license": "MIT",
-  "workspaces": [
-    "./packages/*"
-  ],
-  "files": [
-    ".eslintrc.js"
-  ],
   "scripts": {
-    "clean": "rimraf \"packages/**/dist\" \"packages/**/*.tsbuildinfo\"",
-    "compile": "tsc -b tsconfig.build.json",
-    "test": "ava",
     "lint": "eslint packages/*",
     "fix": "eslint packages/* --fix",
-    "prepare": "npm run compile",
-    "pretest": "npm run compile",
-    "posttest": "npm run lint"
+    "clean": "rimraf \"packages/**/dist\" \"**/*.tsbuildinfo\" \"**/*.tgz\" \"**/.temp\" \"**/.rollup.cache\"",
+    "build": "npm run build:core && npm run build:secondary",
+    "build:core": "npm run build -w=@fazendadosoftware/lxr-core",
+    "build:vite-plugin": "npm run build -w=@fazendadosoftware/vite-plugin-lxr",
+    "build:create-lxr": "npm run build -w=create-lxr",
+    "build:secondary": "npm run build:vite-plugin & npm run build:create-lxr",
+    "dev": "npm run dev -w=@fazendadosoftware/custom-report-vite-demo",
+    "test": "ava",
+    "publish": "npm run clean && npm run build && npm run test && npm publish --access=public --workspaces",
+    "prepare": "husky install"
   },
   "devDependencies": {
-    "@ava/typescript": "^2.0.0",
     "@types/node": "^14.11.2",
-    "@typescript-eslint/eslint-plugin": "^4.29.2",
-    "@typescript-eslint/parser": "^4.29.2",
     "ava": "^3.15.0",
     "eslint": "^7.32.0",
     "eslint-config-standard-with-typescript": "^20.0.0",
+    "eslint-define-config": "^1.0.9",
     "eslint-plugin-import": "^2.24.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
-    "ts-node": "^10.2.1",
-    "typescript": "^4.0.3"
+    "husky": "^7.0.0"
   },
   "ava": {
     "files": [
-      "packages/**/*.test.ts"
+      "packages/**/*.spec.ts"
     ],
     "extensions": [
       "ts"
