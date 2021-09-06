@@ -1,6 +1,6 @@
 {
   "name": "@fazendadosoftware/lxr-core",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Library with core functionality for interfacing with LeanIX Custom Report API",
   "main": "dist/index.js",
   "module": "dist/esm/index.js",
