@@ -1,0 +1,17 @@
+// @ts-check
+import { defineConfig } from 'vite'
+import leanix from '@fazendadosoftware/vite-plugin-lxr'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  build: {
+    lib: {
+      entry: 'src/my-element.ts',
+      formats: ['es']
+    },
+    rollupOptions: {
+      external: /^lit-element/
+    }
+  },
+  plugins: [leanix()]
+})

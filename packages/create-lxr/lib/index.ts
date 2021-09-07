@@ -4,7 +4,7 @@ import { join, resolve, relative } from 'path'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import prompts from 'prompts'
-import { yellow, green, blue, red } from 'kolorist'
+import { yellow, green, blue, red, cyan, magenta, lightRed } from 'kolorist'
 import { validateDocument } from '@fazendadosoftware/lxr-core'
 
 const cwd = process.cwd()
@@ -53,8 +53,7 @@ const FRAMEWORKS: Framework[] = [
         color: blue
       }
     ]
-  }
-  /*
+  },
   {
     name: 'react',
     color: cyan,
@@ -119,7 +118,6 @@ const FRAMEWORKS: Framework[] = [
       }
     ]
   }
-  */
 ]
 
 const TEMPLATES = FRAMEWORKS
