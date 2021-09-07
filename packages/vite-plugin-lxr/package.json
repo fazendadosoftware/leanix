@@ -1,6 +1,6 @@
 {
   "name": "@fazendadosoftware/vite-plugin-lxr",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A Vite plugin for developing LeanIX Custom Reports",
   "main": "dist/index.js",
   "module": "dist/esm/index.js",
