@@ -47,3 +47,11 @@ Currently supported template presets include:
 - `vanilla-ts`
 - `vue`
 - `vue-ts`
+- `react`
+- `react-ts`
+- `preact`
+- `preact-ts`
+- `lit-element`
+- `lit-element-ts`
+- `svelte`
+- `svelte-ts`
