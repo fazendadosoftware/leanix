@@ -4,16 +4,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
+    "build": "vite build --mode development",
+    "upload": "vite build"
   },
   "dependencies": {
     "@leanix/reporting": "^0.4.87"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.11",
-    "svelte": "^3.37.0",
+    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.22",
+    "svelte": "^3.42.4",
     "vite": "^2.5.4",
-    "@fazendadosoftware/vite-plugin-lxr": "^0.0.5"
+    "@fazendadosoftware/vite-plugin-lxr": "0.0.6"
   }
 }

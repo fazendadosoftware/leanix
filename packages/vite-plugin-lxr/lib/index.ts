@@ -31,6 +31,7 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
   let accessToken: AccessToken | null = null
   let claims: JwtClaims | null = null
   let isProduction: boolean = false
+  let credentials: LeanIXCredentials = { host: '', apitoken: '' }
 
   return {
     name: 'vite-plugin-lxr',
@@ -38,22 +39,22 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
     devServerUrl: null,
     launchUrl: null,
     async config (config, env) {
+      try {
+        credentials = await readLxrJson()
+      } catch (error) {
+        logger?.error('💥 Invalid lxr.json file, required params are "host" and "apitoken".')
+        process.exit(1)
+      }
       // server exposes host and runs in TLS + HTTPS2 mode
       // required for serving the custom report files in LeanIX
       config.base = ''
       config.server = { ...config.server ?? {}, https: true, host: true }
+      if (credentials.proxyURL !== undefined) config.server.proxy = { '*': credentials.proxyURL }
     },
     async configResolved (resolvedConfig: ResolvedConfig) {
       isProduction = resolvedConfig.isProduction
       logger = resolvedConfig.logger
       if (resolvedConfig.command === 'serve' || resolvedConfig.isProduction) {
-        let credentials: LeanIXCredentials = { host: '', apitoken: '' }
-        try {
-          credentials = await readLxrJson()
-        } catch (error) {
-          logger?.error('💥 Invalid lxr.json file, required params are "host" and "apitoken".')
-          process.exit(1)
-        }
         try {
           accessToken = await getAccessToken(credentials)
           claims = getAccessTokenClaims(accessToken)
@@ -116,7 +117,7 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
       }
       if (bundle !== undefined && accessToken?.accessToken !== undefined && isProduction) {
         try {
-          const result = await uploadBundle(bundle, accessToken.accessToken)
+          const result = await uploadBundle(bundle, accessToken.accessToken, credentials.proxyURL)
           if (result.status === 'ERROR') {
             logger?.error('💥 Error while uploading project to workpace, check your "package.json" file...')
             logger?.error(JSON.stringify(result, null, 2))

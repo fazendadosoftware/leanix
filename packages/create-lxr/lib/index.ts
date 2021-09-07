@@ -87,22 +87,6 @@ const FRAMEWORKS: Framework[] = [
     ]
   },
   {
-    name: 'lit-element',
-    color: lightRed,
-    variants: [
-      {
-        name: 'lit-element',
-        display: 'JavaScript',
-        color: yellow
-      },
-      {
-        name: 'lit-element-ts',
-        display: 'TypeScript',
-        color: blue
-      }
-    ]
-  },
-  {
     name: 'svelte',
     color: red,
     variants: [
@@ -123,11 +107,6 @@ const FRAMEWORKS: Framework[] = [
 const TEMPLATES = FRAMEWORKS
   .map(({ name, variants }) => Array.isArray(variants) ? variants.map(({ name }) => name) : [name])
   .flat()
-
-/*
-const TEMPLATES = FRAMEWORKS.map(({ variants }) => (f.variants && f.variants.map((v) => v.name)) || [f.name]
-).reduce((a, b) => a.concat(b), [])
-*/
 
 const renameFiles: Record<string, string> = {
   _gitignore: '.gitignore'
