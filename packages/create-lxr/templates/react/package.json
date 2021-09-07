@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
-    "serve": "vite preview"
+    "build": "vite build --mode development",
+    "upload": "vite build"
   },
   "dependencies": {
     "react": "^17.0.0",

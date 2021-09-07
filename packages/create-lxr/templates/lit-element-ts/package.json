@@ -12,7 +12,8 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build"
+    "build": "tsc && ite build --mode development",
+    "upload": "tsc && vite build"
   },
   "dependencies": {
     "lit-element": "^2.4.0",
