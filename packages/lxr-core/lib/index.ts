@@ -1,4 +1,5 @@
-import fetch from 'node-fetch'
+import fetch, { RequestInit } from 'node-fetch'
+import createHttpsProxyAgent from 'https-proxy-agent'
 import jwtDecode from 'jwt-decode'
 import FormData from 'form-data'
 import { c } from 'tar'
@@ -120,7 +121,9 @@ export const getAccessToken = async (credentials: LeanIXCredentials): Promise<Ac
     'Content-Type': 'application/x-www-form-urlencoded',
     Authorization: `Basic ${Buffer.from('apitoken:' + credentials.apitoken).toString('base64')}`
   }
-  const accessToken: AccessToken = await fetch(uri, { method: 'post', headers })
+  const options: RequestInit = { method: 'post', headers }
+  if (credentials.proxyURL !== undefined) options.agent = createHttpsProxyAgent(credentials.proxyURL)
+  const accessToken: AccessToken = await fetch(uri, options)
     .then(async res => {
       const content = await res[res.headers.get('content-type') === 'application/json' ? 'json' : 'text']()
       return res.ok ? content : await Promise.reject(res.status)
@@ -185,13 +188,15 @@ export interface ReportUploadResponseData {
   errors?: ReportUploadError[]
 }
 
-export const uploadBundle = async (bundle: CustomReportProjectBundle, bearerToken: BearerToken): Promise<ReportUploadResponseData> => {
+export const uploadBundle = async (bundle: CustomReportProjectBundle, bearerToken: BearerToken, proxyURL?: string): Promise<ReportUploadResponseData> => {
   const decodedToken: JwtClaims = jwtDecode(bearerToken)
   const url = `${decodedToken.instanceUrl}/services/pathfinder/v1/reports/upload`
   const headers = { Authorization: `Bearer ${bearerToken}` }
   const form = new FormData()
   form.append('file', bundle)
-  const reportResponseData: ReportUploadResponseData = await fetch(url, { method: 'post', headers, body: form })
+  const options: RequestInit = { method: 'post', headers, body: form }
+  if (proxyURL !== undefined) options.agent = createHttpsProxyAgent(proxyURL)
+  const reportResponseData: ReportUploadResponseData = await fetch(url, options)
     .then(async res => {
       const contentType: string | null = res.headers.get('content-type')
       const content = contentType === 'text/plain'
@@ -206,13 +211,15 @@ export const uploadBundle = async (bundle: CustomReportProjectBundle, bearerToke
   return reportResponseData
 }
 
-export const fetchWorkspaceReports = async (bearerToken: BearerToken): Promise<CustomReportMetadata[]> => {
+export const fetchWorkspaceReports = async (bearerToken: BearerToken, proxyURL?: string): Promise<CustomReportMetadata[]> => {
   const decodedToken: JwtClaims = jwtDecode(bearerToken)
   const headers = { Authorization: `Bearer ${bearerToken}` }
   const fetchReportsPage = async (cursor: string | null = null): Promise<ReportsResponseData> => {
     const url = new URL(`${decodedToken.instanceUrl}/services/pathfinder/v1/reports?sorting=updatedAt&sortDirection=DESC&pageSize=100`)
     if (cursor !== null) url.searchParams.append('cursor', cursor)
-    const reportsPage: ReportsResponseData = await fetch(url, { method: 'get', headers })
+    const options: RequestInit = { method: 'get', headers }
+    if (proxyURL !== undefined) options.agent = createHttpsProxyAgent(proxyURL)
+    const reportsPage: ReportsResponseData = await fetch(url, options)
       .then(async res => await res.json())
     return reportsPage
   }
@@ -227,11 +234,13 @@ export const fetchWorkspaceReports = async (bearerToken: BearerToken): Promise<C
   return reports
 }
 
-export const deleteWorkspaceReportById = async (reportId: ReportId, bearerToken: BearerToken): Promise<204 | number> => {
+export const deleteWorkspaceReportById = async (reportId: ReportId, bearerToken: BearerToken, proxyURL?: string): Promise<204 | number> => {
   const decodedToken: JwtClaims = jwtDecode(bearerToken)
   const headers = { Authorization: `Bearer ${bearerToken}` }
   const url = new URL(`${decodedToken.instanceUrl}/services/pathfinder/v1/reports/${reportId}`)
-  const status = await fetch(url, { method: 'delete', headers })
+  const options: RequestInit = { method: 'delete', headers }
+  if (proxyURL !== undefined) options.agent = createHttpsProxyAgent(proxyURL)
+  const status = await fetch(url, options)
     .then(({ status }) => status)
   return status === 204 ? await Promise.resolve(status) : await Promise.reject(status)
 }
