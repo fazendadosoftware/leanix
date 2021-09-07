@@ -1,6 +1,6 @@
 {
   "name": "create-lxr",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "license": "MIT",
   "author": "Paulo dos Santos",
   "bin": "dist/index.js",
@@ -9,7 +9,7 @@
     "dist"
   ],
   "scripts": {
-    "preinstall": "mkdir dist && touch dist/index.js",
+    "preinstall": "mkdir -p dist && [[ -f dist/index.js ]] || touch dist/index.js",
     "clean": "rimraf dist \"**/.rollup.cache\"",
     "build": "npm run clean && rollup -c && chmod -R 777 ./dist/",
     "update:versions": "node scripts/updateVersions"
