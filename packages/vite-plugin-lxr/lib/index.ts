@@ -49,14 +49,17 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
       // required for serving the custom report files in LeanIX
       config.base = ''
       config.server = { ...config.server ?? {}, https: true, host: true }
-      if (credentials.proxyURL !== undefined) config.server.proxy = { '*': credentials.proxyURL }
+      if (credentials.proxyURL !== undefined) {
+        config.server.proxy = { '*': credentials.proxyURL }
+        logger?.info(`ℹ️ using proxy ${credentials.proxyURL}`)
+      }
     },
     async configResolved (resolvedConfig: ResolvedConfig) {
       isProduction = resolvedConfig.isProduction
       logger = resolvedConfig.logger
       if (resolvedConfig.command === 'serve' || resolvedConfig.isProduction) {
         try {
-          accessToken = await getAccessToken(credentials)
+          accessToken = await getAccessToken(credentials, logger)
           claims = getAccessTokenClaims(accessToken)
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           if (claims !== null) logger?.info(`🔥 Your workspace is ${claims.principal.permission.workspaceName}`)
@@ -117,7 +120,7 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
       }
       if (bundle !== undefined && accessToken?.accessToken !== undefined && isProduction) {
         try {
-          const result = await uploadBundle(bundle, accessToken.accessToken, credentials.proxyURL)
+          const result = await uploadBundle(bundle, accessToken.accessToken, { proxyURL: credentials.proxyURL, logger })
           if (result.status === 'ERROR') {
             logger?.error('💥 Error while uploading project to workpace, check your "package.json" file...')
             logger?.error(JSON.stringify(result, null, 2))

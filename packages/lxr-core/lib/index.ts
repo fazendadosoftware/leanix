@@ -7,6 +7,7 @@ import { resolve } from 'path'
 import { existsSync, writeFileSync, readdirSync, createReadStream, ReadStream, readFileSync } from 'fs'
 import { URL } from 'url'
 import { validate, ValidatorResult } from 'jsonschema'
+import { Logger } from 'vite'
 import LeanIXCredentialsSchema from './schema/LeanIXCredentials.json'
 import CustomReportMetadataSchema from './schema/CustomReportMetadata.json'
 import PackageJsonLXRSchema from './schema/PackageJsonLXR.json'
@@ -98,8 +99,8 @@ export const validateDocument = async (document: any, name: 'lxr.json' | 'lxrepo
 
 export const readLxrJson = async (path?: string): Promise<LeanIXCredentials> => {
   if ((path ?? '').length === 0) path = `${process.cwd()}/lxr.json`
-  const { host, apitoken } = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
-  const credentials: LeanIXCredentials = { host, apitoken }
+  const { host, apitoken, proxyURL } = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
+  const credentials: LeanIXCredentials = { host, apitoken, proxyURL }
   await validateDocument(credentials, 'lxr.json')
   validate(credentials, LeanIXCredentialsSchema, { throwAll: true })
   return credentials
@@ -115,14 +116,17 @@ export const readMetadataJson = async (path: string = `${process.cwd()}/package.
   return metadata
 }
 
-export const getAccessToken = async (credentials: LeanIXCredentials): Promise<AccessToken> => {
+export const getAccessToken = async (credentials: LeanIXCredentials, logger?: Logger): Promise<AccessToken> => {
   const uri = `https://${credentials.host}/services/mtm/v1/oauth2/token?grant_type=client_credentials`
   const headers = {
     'Content-Type': 'application/x-www-form-urlencoded',
     Authorization: `Basic ${Buffer.from('apitoken:' + credentials.apitoken).toString('base64')}`
   }
   const options: RequestInit = { method: 'post', headers }
-  if (credentials.proxyURL !== undefined) options.agent = createHttpsProxyAgent(credentials.proxyURL)
+  if (credentials.proxyURL !== undefined) {
+    options.agent = createHttpsProxyAgent(credentials.proxyURL)
+    logger?.info(`ℹ️ getting access toking using proxy ${credentials.proxyURL}`)
+  }
   const accessToken: AccessToken = await fetch(uri, options)
     .then(async res => {
       const content = await res[res.headers.get('content-type') === 'application/json' ? 'json' : 'text']()
@@ -188,15 +192,23 @@ export interface ReportUploadResponseData {
   errors?: ReportUploadError[]
 }
 
-export const uploadBundle = async (bundle: CustomReportProjectBundle, bearerToken: BearerToken, proxyURL?: string): Promise<ReportUploadResponseData> => {
+export interface UploadBundleOptions {
+  proxyURL?: string
+  logger?: Logger
+}
+
+export const uploadBundle = async (bundle: CustomReportProjectBundle, bearerToken: BearerToken, options?: UploadBundleOptions): Promise<ReportUploadResponseData> => {
   const decodedToken: JwtClaims = jwtDecode(bearerToken)
   const url = `${decodedToken.instanceUrl}/services/pathfinder/v1/reports/upload`
   const headers = { Authorization: `Bearer ${bearerToken}` }
   const form = new FormData()
   form.append('file', bundle)
-  const options: RequestInit = { method: 'post', headers, body: form }
-  if (proxyURL !== undefined) options.agent = createHttpsProxyAgent(proxyURL)
-  const reportResponseData: ReportUploadResponseData = await fetch(url, options)
+  const reqOptions: RequestInit = { method: 'post', headers, body: form }
+  if (options?.proxyURL !== undefined) {
+    reqOptions.agent = createHttpsProxyAgent(options.proxyURL)
+    options?.logger?.info(`ℹ️ uploading bundle using proxy ${options.proxyURL}`)
+  }
+  const reportResponseData: ReportUploadResponseData = await fetch(url, reqOptions)
     .then(async res => {
       const contentType: string | null = res.headers.get('content-type')
       const content = contentType === 'text/plain'

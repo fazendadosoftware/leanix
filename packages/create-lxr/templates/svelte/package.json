@@ -14,6 +14,6 @@
     "@sveltejs/vite-plugin-svelte": "^1.0.0-next.22",
     "svelte": "^3.42.4",
     "vite": "^2.5.5",
-    "@fazendadosoftware/vite-plugin-lxr": "^0.0.7"
+    "@fazendadosoftware/vite-plugin-lxr": "^0.0.9"
   }
 }

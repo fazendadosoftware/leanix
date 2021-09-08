@@ -24,7 +24,8 @@
     "dev": "npm run dev -w=@fazendadosoftware/custom-report-vite-demo",
     "test": "ava",
     "publish": "npm run clean && npm run build && npm run test && npm publish --access=public --workspaces",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "update:templates": "node packages/create-lxr/scripts/updateVersions"
   },
   "devDependencies": {
     "@types/node": "^14.11.2",
