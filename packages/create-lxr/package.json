@@ -1,6 +1,6 @@
 {
   "name": "create-lxr",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "license": "MIT",
   "author": "Paulo dos Santos",
   "bin": "dist/index.js",

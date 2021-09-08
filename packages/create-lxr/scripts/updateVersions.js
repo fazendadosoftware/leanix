@@ -42,9 +42,9 @@ const log = console.log
         }
       }
     }
-    if (pkg.devDependencies['@fazendadosoftware/vite-plugin-lxr'] !== `^${currentLeanIXVitePluginVersion}`) {
-      pkg.devDependencies['@fazendadosoftware/vite-plugin-lxr'] = `^${currentLeanIXVitePluginVersion}`
-      updates.push(`➕  Added ${green.bold('@fazendadosoftware/vite-plugin-lxr')} ^${currentLeanIXVitePluginVersion} to ${bold('devDependencies')}`)
+    if (pkg.devDependencies['vite-plugin-lxr'] !== `^${currentLeanIXVitePluginVersion}`) {
+      pkg.devDependencies['vite-plugin-lxr'] = `^${currentLeanIXVitePluginVersion}`
+      updates.push(`➕  Added ${green.bold('vite-plugin-lxr')} ^${currentLeanIXVitePluginVersion} to ${bold('devDependencies')}`)
     }
     if (updates.length > 0) writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
 

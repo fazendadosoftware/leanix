@@ -13,6 +13,6 @@
   "devDependencies": {
     "@preact/preset-vite": "^2.1.0",
     "vite": "^2.5.5",
-    "@fazendadosoftware/vite-plugin-lxr": "^0.0.9"
+    "vite-plugin-lxr": "^0.0.1"
   }
 }
