@@ -17,7 +17,7 @@
     "fix": "eslint packages/* --fix",
     "clean": "rimraf \"packages/**/dist\" \"**/*.tsbuildinfo\" \"**/*.tgz\" \"**/.temp\" \"**/.rollup.cache\"",
     "build": "npm run build:core && npm run build:secondary",
-    "build:core": "npm run build -w=@fazendadosoftware/lxr-core",
+    "build:core": "npm run build -w=lxr-core",
     "build:vite-plugin": "npm run build -w=@fazendadosoftware/vite-plugin-lxr",
     "build:create-lxr": "npm run build -w=create-lxr",
     "build:secondary": "npm run build:vite-plugin & npm run build:create-lxr",
