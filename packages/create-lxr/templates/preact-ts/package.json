@@ -14,6 +14,6 @@
     "@preact/preset-vite": "^2.1.0",
     "typescript": "^4.4.2",
     "vite": "^2.5.4",
-    "@fazendadosoftware/vite-plugin-lxr": "0.0.6"
+    "@fazendadosoftware/vite-plugin-lxr": "^0.0.6"
   }
 }
