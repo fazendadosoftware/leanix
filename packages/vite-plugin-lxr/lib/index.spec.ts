@@ -4,6 +4,8 @@ import { resolve } from 'path'
 import { writeFileSync, rmdirSync, existsSync, mkdirSync, readdirSync, createReadStream } from 'fs'
 import { ReadEntry, t as tarT } from 'tar'
 import { v4 as uuid } from 'uuid'
+// @ts-ignore
+import ProxyServer from 'transparent-proxy'
 import { CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, readLxrJson, getAccessToken, AccessToken } from '../../lxr-core/lib/index'
 import leanixPlugin from './index'
 
@@ -42,15 +44,53 @@ test.before(async t => {
   accessToken = await deleteExistingReportInWorkspace(t, accessToken)
 })
 
+test.before(async t => {
+  const startProxy = async () => {
+    return new Promise((resolve, reject) => {
+      const proxy = new ProxyServer()
+      proxy.listen(0, '127.0.0.1', () => resolve(proxy))
+    })
+  }
+  // @ts-ignore
+  t.context.proxy = await startProxy()
+  // @ts-ignore
+  const { address, port }: { address: string, port: number } = t.context.proxy.address()
+  console.log(`TCP-Proxy-Server listening at http://${address}:${port}`)
+})
+
 test.after.always('cleanup', async t => {
   rmdirSync(tmpDir, { recursive: true })
   await deleteExistingReportInWorkspace(t, accessToken)
+  // @ts-ignore
+  t.context.proxy.close() // close proxy server
 })
 
 test('plugin gets the launch url in development', async t => {
   t.timeout(10000, 'timeout occurred!')
 
   const plugin = leanixPlugin()
+  const server = await createServer({ plugins: [plugin] })
+
+  await server.listen()
+  const interval = setInterval(() => t.log('Waiting for launch url...'), 1000)
+  while (plugin.launchUrl === null) await new Promise<void>(resolve => setTimeout(() => resolve(), 100))
+  clearInterval(interval)
+
+  const url = new URL(plugin.launchUrl)
+  const devServerUrl = url.searchParams.get('url')
+
+  t.is(url.protocol, 'https:', 'launch url is https')
+  t.is(devServerUrl, plugin.devServerUrl, 'launch url has the correct devServerUrl')
+  await server.close()
+})
+
+test('plugin gets the launch url in development with a proxy', async t => {
+  t.timeout(10000, 'timeout occurred!')
+  // @ts-ignore
+  const { address, port }: { address: string, port: number } = t.context.proxy.address()
+  const proxyURL = `http://${address}:${port}`
+
+  const plugin = leanixPlugin({ proxyURL })
   const server = await createServer({ plugins: [plugin] })
 
   await server.listen()
@@ -132,4 +172,77 @@ test('plugin creates bundle file "bundle.tgz" when building', async t => {
   t.true(assetFile !== undefined, `bundle includes generated asset file "${assetsFolder}/${assetFilename}"`)
 
   Object.values(folders).forEach(path => rmdirSync(path, { recursive: true }))
+})
+
+test.serial('plugin creates bundle file "bundle.tgz" when building, and uploads using a proxy', async t => {
+  t.timeout(10000, 'timeout occurred!')
+
+  // @ts-ignore
+  const { address, port }: { address: string, port: number } = t.context.proxy.address()
+  const proxyURL = `http://${address}:${port}`
+
+  const testBaseDir: string = resolve(tmpDir, uuid())
+
+  const folders: Record<string, string> = Object.entries({ srcDir: `${testBaseDir}/src`, outDir: `${testBaseDir}/dist` })
+    .reduce((accumulator, [key, value]) => ({ ...accumulator, [key]: resolve(testBaseDir, value) }), {})
+
+  Object.values(folders).forEach(path => {
+    if (existsSync(path)) rmdirSync(path, { recursive: true })
+    mkdirSync(path, { recursive: true })
+  })
+
+  const { name, author, description, version, ...leanixReport } = getDummyReportMetadata()
+  const projectFiles = {
+    'index.js': 'console.log("hello world")',
+    'index.html': '<html><body>Hello world<script type="module" src="./index.js"></script></body></html>',
+    'package.json': JSON.stringify({ name, version, author, description, leanixReport })
+  }
+
+  Object.entries(projectFiles)
+    .forEach(([filename, content]) => writeFileSync(resolve(folders.srcDir, filename), content))
+
+  const assetsFolder = 'assets'
+  const assetsDir = resolve(folders.outDir, assetsFolder)
+
+  const output: any = await build({
+    root: folders.srcDir,
+    build: { outDir: folders.outDir, assetsDir: assetsFolder },
+    plugins: [leanixPlugin({ packageJsonPath: resolve(folders.srcDir, 'package.json'), proxyURL })]
+  })
+
+  const chunk = output?.output.find((t: any) => t?.type === 'chunk')
+  t.is(typeof chunk, 'object', 'chunk is an object')
+
+  const assetFilename: string = (chunk.fileName ?? '').split('/')[1]
+  t.true(assetFilename !== undefined, 'assetFilename is not undefined')
+
+  const outDirEntries = readdirSync(folders.outDir)
+  const assetsDirEntries = readdirSync(assetsDir)
+
+  t.true(outDirEntries.length === 4, 'outDir has 4 entries')
+  t.true(assetsDirEntries.length === 1, 'assetsDir has 1 entry')
+  t.is(assetsDirEntries[0], assetFilename, 'generate asset file is in assets folder')
+
+  t.true(outDirEntries.includes('bundle.tgz'), '"bundle.tgz" was generated')
+  const fileStream = createReadStream(resolve(folders.outDir, 'bundle.tgz'))
+
+  const bundleFiles = await new Promise<ReadEntry[]>((resolve, reject) => {
+    const entries: ReadEntry[] = []
+    fileStream.on('open', () => fileStream.pipe(tarT()).on('entry', entry => entries.push(entry)))
+    fileStream.on('error', err => reject(err))
+    fileStream.on('end', () => { resolve(entries) })
+  })
+
+  t.is(bundleFiles.length, 4, 'bundle file has 4 entries')
+  const assetDirectory = bundleFiles.find(({ path, type }) => type === 'Directory' && path === `${assetsFolder}/`)
+  t.true(assetDirectory !== undefined, `bundle includes asset directory "/${assetsFolder}"`)
+  const indexHtmlFile = bundleFiles.find(({ path, type }) => type === 'File' && path === 'index.html')
+  t.true(indexHtmlFile !== undefined, 'bundle includes file "index.html"')
+  const metadataJsonFile = bundleFiles.find(({ path, type }) => type === 'File' && path === 'lxreport.json')
+  t.true(metadataJsonFile !== undefined, 'bundle includes metadata file "lxreport.json"')
+  const assetFile = bundleFiles.find(({ path, type }) => type === 'File' && path === `${assetsFolder}/${assetFilename}`)
+  t.true(assetFile !== undefined, `bundle includes generated asset file "${assetsFolder}/${assetFilename}"`)
+
+  Object.values(folders).forEach(path => rmdirSync(path, { recursive: true }))
+  await deleteExistingReportInWorkspace(t, accessToken)
 })

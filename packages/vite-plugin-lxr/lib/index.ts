@@ -24,6 +24,8 @@ interface LeanIXPlugin extends Plugin {
 
 interface LeanIXPluginOptions {
   packageJsonPath?: string
+  credentials?: LeanIXCredentials
+  proxyURL?: string
 }
 
 const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
@@ -39,12 +41,16 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
     devServerUrl: null,
     launchUrl: null,
     async config (config, env) {
-      try {
-        credentials = await readLxrJson()
-      } catch (error) {
-        logger?.error('💥 Invalid lxr.json file, required params are "host" and "apitoken".')
-        process.exit(1)
+      if (pluginOptions?.credentials !== undefined) credentials = pluginOptions.credentials
+      else {
+        try {
+          credentials = await readLxrJson()
+        } catch (error) {
+          logger?.error('💥 Invalid lxr.json file, required params are "host" and "apitoken".')
+          process.exit(1)
+        }
       }
+      if (pluginOptions?.proxyURL !== undefined) credentials.proxyURL = pluginOptions.proxyURL
       // server exposes host and runs in TLS + HTTPS2 mode
       // required for serving the custom report files in LeanIX
       config.base = ''
