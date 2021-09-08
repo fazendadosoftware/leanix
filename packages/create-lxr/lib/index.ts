@@ -285,7 +285,7 @@ async function init (argv: Options): Promise<void> {
 
   console.log(`\nScaffolding project in ${root}...`)
 
-  const templateDir = join(__dirname, 'templates', template)
+  const templateDir = resolve(__dirname, '..', 'templates', template)
 
   const write = (file: string, content?: string): void => {
     const targetPath = join(root, renameFiles[file] ?? file)

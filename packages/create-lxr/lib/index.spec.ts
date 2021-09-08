@@ -38,7 +38,8 @@ const getAllFiles = (dirPath: string, arrayOfFiles: string[] = []): string[] => 
 }
 
 // Vue 3 starter template plus 1 generated file: 'lxr.json'
-const templateFiles = [...getAllFiles(join(CLI_PATH, '..', 'templates', 'vue')), 'lxr.json']
+const templatePath = resolve(CLI_PATH, '..', '..', 'templates', 'vue')
+const templateFiles = [...getAllFiles(templatePath), 'lxr.json']
   .map(file => file === '_gitignore' ? '.gitignore' : file)
   .sort()
 

@@ -4,7 +4,6 @@ import { nodeResolve } from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
 import { terser } from 'rollup-plugin-terser'
 import summary from 'rollup-plugin-summary'
-import copy from 'rollup-plugin-copy'
 import shebang from 'rollup-plugin-preserve-shebang'
 import { normalize } from 'path'
 import pkg from './package.json'
@@ -41,7 +40,6 @@ export default [
       // ...Object.keys(pkg.devDependencies || {})
     ],
     plugins: [
-      copy({ targets: [{ src: 'templates', dest: 'dist/' }] }),
       shebang(),
       typescript({ declaration: false, outputToFilesystem: false }),
       json({ compact: true }),
