@@ -9,7 +9,7 @@
   "devDependencies": {
     "typescript": "^4.4.3",
     "vite": "^2.6.2",
-    "vite-plugin-lxr": "0.0.6"
+    "vite-plugin-lxr": "^0.0.3"
   },
   "dependencies": {
     "@leanix/reporting": "^0.4.89"
