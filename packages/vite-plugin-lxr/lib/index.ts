@@ -15,7 +15,7 @@ import {
   ValidationError,
   CustomReportProjectBundle,
   JwtClaims
-} from '@fazendadosoftware/lxr-core'
+} from 'lxr-core'
 
 interface LeanIXPlugin extends Plugin {
   devServerUrl: string | null

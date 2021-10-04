@@ -4,8 +4,8 @@ import { join, resolve, relative } from 'path'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import prompts from 'prompts'
-import { yellow, green, blue, red, cyan, magenta, lightRed } from 'kolorist'
-import { validateDocument } from '@fazendadosoftware/lxr-core'
+import { yellow, green, blue, red, cyan, magenta } from 'kolorist'
+import { validateDocument } from 'lxr-core'
 
 const cwd = process.cwd()
 

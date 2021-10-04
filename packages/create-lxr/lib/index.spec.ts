@@ -1,6 +1,7 @@
 import test from 'ava'
 import { commandSync, ExecaSyncReturnValue, SyncOptions } from 'execa'
-import { mkdirpSync, readdirSync, remove, writeFileSync, statSync } from 'fs-extra'
+import { mkdirpSync, readdirSync, writeFileSync, statSync } from 'fs-extra'
+import { rmdirSync } from 'fs'
 import { join, resolve } from 'path'
 import pkg from '../package.json'
 
@@ -42,8 +43,8 @@ const templateFiles = [...getAllFiles(join(CLI_PATH, '..', 'templates', 'vue')),
   .map(file => file === '_gitignore' ? '.gitignore' : file)
   .sort()
 
-test.beforeEach(async () => await remove(genPath))
-test.after.always(async () => await remove(genPath))
+test.beforeEach(() => rmdirSync(genPath, { recursive: true }))
+test.after.always(() => rmdirSync(genPath, { recursive: true }))
 
 test('prompts for the project name if none supplied', t => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
