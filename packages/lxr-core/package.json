@@ -1,7 +1,7 @@
 {
   "name": "lxr-core",
-  "private": true,
-  "version": "0.0.2",
+  "private": false,
+  "version": "0.0.1",
   "description": "Library with core functionality for interfacing with LeanIX Custom Report API",
   "main": "dist/index.js",
   "module": "dist/esm/index.js",
