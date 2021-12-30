@@ -8,12 +8,12 @@
     "upload": "vite build"
   },
   "dependencies": {
-    "@leanix/reporting": "^0.4.89"
+    "@leanix/reporting": "^0.4.94"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.26",
-    "svelte": "^3.43.1",
-    "vite": "^2.6.2",
+    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.33",
+    "svelte": "^3.44.3",
+    "vite": "^2.7.10",
     "vite-plugin-lxr": "^0.0.3"
   }
 }

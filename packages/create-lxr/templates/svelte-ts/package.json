@@ -9,17 +9,17 @@
     "check": "svelte-check --tsconfig ./tsconfig.json"
   },
   "dependencies": {
-    "@leanix/reporting": "^0.4.89"
+    "@leanix/reporting": "^0.4.94"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.26",
-    "@tsconfig/svelte": "^2.0.1",
-    "svelte": "^3.43.1",
-    "svelte-check": "^2.2.6",
-    "svelte-preprocess": "^4.9.8",
+    "@sveltejs/vite-plugin-svelte": "^1.0.0-next.33",
+    "@tsconfig/svelte": "^3.0.0",
+    "svelte": "^3.44.3",
+    "svelte-check": "^2.2.11",
+    "svelte-preprocess": "^4.10.1",
     "tslib": "^2.3.1",
-    "typescript": "^4.4.3",
-    "vite": "^2.6.2",
+    "typescript": "^4.5.4",
+    "vite": "^2.7.10",
     "vite-plugin-lxr": "^0.0.3"
   }
 }
