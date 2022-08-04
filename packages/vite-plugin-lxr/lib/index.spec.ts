@@ -1,7 +1,7 @@
 import test, { ExecutionContext } from 'ava'
 import { createServer, build } from 'vite'
 import { resolve } from 'path'
-import { writeFileSync, rmdirSync, existsSync, mkdirSync, readdirSync, createReadStream } from 'fs'
+import { writeFileSync, rmSync, existsSync, mkdirSync, readdirSync, createReadStream } from 'fs'
 import { ReadEntry, t as tarT } from 'tar'
 import { v4 as uuid } from 'uuid'
 import { CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, readLxrJson, getAccessToken, AccessToken } from '../../lxr-core/lib/index'
@@ -37,13 +37,13 @@ const deleteExistingReportInWorkspace = async (t: ExecutionContext | null, acces
 }
 
 test.before(async t => {
-  if (existsSync(tmpDir)) rmdirSync(tmpDir, { recursive: true })
+  if (existsSync(tmpDir)) rmSync(tmpDir, { recursive: true })
   mkdirSync(tmpDir, { recursive: true })
   accessToken = await deleteExistingReportInWorkspace(t, accessToken)
 })
 
 test.after.always('cleanup', async t => {
-  rmdirSync(tmpDir, { recursive: true })
+  rmSync(tmpDir, { recursive: true })
   await deleteExistingReportInWorkspace(t, accessToken)
 })
 
@@ -75,7 +75,7 @@ test('plugin creates bundle file "bundle.tgz" when building', async t => {
     .reduce((accumulator, [key, value]) => ({ ...accumulator, [key]: resolve(testBaseDir, value) }), {})
 
   Object.values(folders).forEach(path => {
-    if (existsSync(path)) rmdirSync(path, { recursive: true })
+    if (existsSync(path)) rmSync(path, { recursive: true })
     mkdirSync(path, { recursive: true })
   })
 
@@ -131,5 +131,5 @@ test('plugin creates bundle file "bundle.tgz" when building', async t => {
   const assetFile = bundleFiles.find(({ path, type }) => type === 'File' && path === `${assetsFolder}/${assetFilename}`)
   t.true(assetFile !== undefined, `bundle includes generated asset file "${assetsFolder}/${assetFilename}"`)
 
-  Object.values(folders).forEach(path => rmdirSync(path, { recursive: true }))
+  Object.values(folders).forEach(path => rmSync(path, { recursive: true }))
 })

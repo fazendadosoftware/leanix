@@ -1,7 +1,7 @@
 import test from 'ava'
 import { URL } from 'url'
 import { resolve } from 'path'
-import { existsSync, mkdirSync, rmdirSync, writeFileSync } from 'fs'
+import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs'
 import { ReadEntry, t as tarT } from 'tar'
 import { validateDocument, readLxrJson, getAccessToken, getLaunchUrl, createBundle, CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, uploadBundle } from './index'
 
@@ -23,8 +23,8 @@ test('validate "lxr.json" and "lxreport.json" against document schemas', async t
   await t.notThrowsAsync(validateDocument(validMetadataDocument, 'lxreport.json'))
   await t.throwsAsync(validateDocument(invalidMetadataDocument, 'lxreport.json'))
 
-  await t.notThrowsAsync(validateDocument({ host: 'app.leanix.net', apitoken: 'token' }, 'lxr.json'))
-  await t.throwsAsync(validateDocument({ host: 'app.leanix.net' }, 'lxr.json'))
+  await t.notThrowsAsync(validateDocument({ host: 'demo-us.leanix.net', apitoken: 'token' }, 'lxr.json'))
+  await t.throwsAsync(validateDocument({ host: 'demo-us.leanix.net' }, 'lxr.json'))
 })
 
 test('getAccessToken returns a token', async t => {
@@ -57,7 +57,7 @@ test('getLaunchUrl returns a url', async t => {
 test('createProjectBundle returns a readable stream', async t => {
   const outDir = resolve(__dirname, '../.temp/createProjectBundle')
 
-  if (existsSync(outDir)) rmdirSync(outDir, { recursive: true })
+  if (existsSync(outDir)) rmSync(outDir, { recursive: true })
   mkdirSync(outDir, { recursive: true })
 
   const projectFiles = {
@@ -89,7 +89,7 @@ test('createProjectBundle returns a readable stream', async t => {
   t.true(bundleFiles.size === requiredFiles.size, `fileStream entries is an array with ${requiredFiles.size} items`)
   t.true(bundleHasAllFiles(), `fileStream has all required files: ${Array.from(requiredFiles).join(', ')}`)
 
-  rmdirSync(outDir, { recursive: true })
+  rmSync(outDir, { recursive: true })
 })
 
 test('uploadBundle', async t => {
@@ -110,5 +110,5 @@ test('uploadBundle', async t => {
   t.is(typeof reportUploadResponseData.data.id, 'string')
   const status = await deleteWorkspaceReportById(reportUploadResponseData.data.id, accessToken.accessToken)
   t.is(status, 204)
-  rmdirSync(outDir, { recursive: true })
+  rmSync(outDir, { recursive: true })
 })
