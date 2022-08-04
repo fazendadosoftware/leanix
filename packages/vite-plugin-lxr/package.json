@@ -18,8 +18,7 @@
   },
   "peerDependencies": {
     "vite": "^3.0.4",
-    "typescript": "^4.7.4",
-    "@types/node": "^18.6.3"
+    "typescript": "^4.7.4"
   },
   "devDependencies": {
     "tar": "^6.1.10"
