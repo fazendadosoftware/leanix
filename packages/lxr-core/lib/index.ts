@@ -128,7 +128,7 @@ export const getAccessToken = async (credentials: LeanIXCredentials): Promise<Ac
       const content = await res[res.headers.get('content-type') === 'application/json' ? 'json' : 'text']()
       return res.ok ? content : await Promise.reject(res.status)
     })
-    .then(accessToken => Object.entries(accessToken)
+    .then(accessToken => Object.entries(accessToken as AccessToken)
       .reduce((accumulator, [key, value]) => ({ ...accumulator, [snakeToCamel(key)]: value }), {
         accessToken: '',
         expired: false,
@@ -199,14 +199,12 @@ export const uploadBundle = async (bundle: CustomReportProjectBundle, bearerToke
   const reportResponseData: ReportUploadResponseData = await fetch(url, options)
     .then(async res => {
       const contentType: string | null = res.headers.get('content-type')
-      const content = contentType === 'text/plain'
-        ? await res.text()
-        : contentType === 'application/json'
-          ? await res.json()
-          : null
-      if (content === null) throw Error(`status ${res.status}, unknown content type ${contentType ?? 'null'}`)
+      const content = contentType === 'application/json'
+        ? await res.json()
+        : await res.text()
+      // if (content === null) throw Error(`status ${res.status}, unknown content type ${contentType ?? 'null'}`)
       if (!res.ok) throw Error(JSON.stringify({ status: res.status, message: content }))
-      return content
+      return content as ReportUploadResponseData
     })
   return reportResponseData
 }
@@ -219,8 +217,8 @@ export const fetchWorkspaceReports = async (bearerToken: BearerToken, proxyURL?:
     if (cursor !== null) url.searchParams.append('cursor', cursor)
     const options: RequestInit = { method: 'get', headers }
     if (proxyURL !== undefined) options.agent = createHttpsProxyAgent(proxyURL)
-    const reportsPage: ReportsResponseData = await fetch(url, options)
-      .then(async res => await res.json())
+    const reportsPage: ReportsResponseData = await fetch(url.toString(), options)
+      .then(async res => await res.json() as ReportsResponseData)
     return reportsPage
   }
   const reports: CustomReportMetadata[] = []
@@ -240,7 +238,7 @@ export const deleteWorkspaceReportById = async (reportId: ReportId, bearerToken:
   const url = new URL(`${decodedToken.instanceUrl}/services/pathfinder/v1/reports/${reportId}`)
   const options: RequestInit = { method: 'delete', headers }
   if (proxyURL !== undefined) options.agent = createHttpsProxyAgent(proxyURL)
-  const status = await fetch(url, options)
+  const status = await fetch(url.toString(), options)
     .then(({ status }) => status)
   return status === 204 ? await Promise.resolve(status) : await Promise.reject(status)
 }
