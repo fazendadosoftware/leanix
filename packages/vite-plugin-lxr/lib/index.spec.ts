@@ -1,4 +1,5 @@
-import test, { ExecutionContext } from 'ava'
+import { expect, test, beforeAll, afterAll } from 'vitest'
+// import test, { ExecutionContext } from 'ava'
 import { createServer, build } from 'vite'
 import { resolve } from 'path'
 import { writeFileSync, rmSync, existsSync, mkdirSync, readdirSync, createReadStream } from 'fs'
@@ -21,7 +22,7 @@ const getDummyReportMetadata = (): CustomReportMetadata => ({
 
 let accessToken: AccessToken | null = null
 
-const deleteExistingReportInWorkspace = async (t: ExecutionContext | null, accessToken: AccessToken | null): Promise<AccessToken> => {
+const deleteExistingReportInWorkspace = async (accessToken: AccessToken | null): Promise<AccessToken> => {
   const { id, version } = getDummyReportMetadata()
   const credentials = await readLxrJson()
   if (accessToken === null) accessToken = await getAccessToken(credentials)
@@ -29,46 +30,42 @@ const deleteExistingReportInWorkspace = async (t: ExecutionContext | null, acces
   const { id: reportId = null } = reports.find(({ reportId, version: reportVersion }) => reportId === id && reportVersion === version) ?? {}
   if (reportId !== null) {
     const status = await deleteWorkspaceReportById(reportId, accessToken.accessToken)
-    if (status === 204) t?.log('Deleted existing report in workspace')
+    if (status === 204) console.log('Deleted existing report in workspace')
     // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-    else t?.log(`Error deleting report in workspace. Got ${status}`)
+    else console.log(`Error deleting report in workspace. Got ${status}`)
   }
   return accessToken
 }
 
-test.before(async t => {
+beforeAll(async () => {
   if (existsSync(tmpDir)) rmSync(tmpDir, { recursive: true })
   mkdirSync(tmpDir, { recursive: true })
-  accessToken = await deleteExistingReportInWorkspace(t, accessToken)
+  accessToken = await deleteExistingReportInWorkspace(accessToken)
 })
 
-test.after.always('cleanup', async t => {
+afterAll(async () => {
   rmSync(tmpDir, { recursive: true })
-  await deleteExistingReportInWorkspace(t, accessToken)
+  await deleteExistingReportInWorkspace(accessToken)
 })
 
-test('plugin gets the launch url in development', async t => {
-  t.timeout(10000, 'timeout occurred!')
-
+test('plugin gets the launch url in development', async () => {
   const plugin = leanixPlugin()
   const server = await createServer({ plugins: [plugin] })
 
   await server.listen()
-  const interval = setInterval(() => t.log('Waiting for launch url...'), 1000)
+  const interval = setInterval(() => console.log('Waiting for launch url...'), 1000)
   while (plugin.launchUrl === null) await new Promise<void>(resolve => setTimeout(() => resolve(), 100))
   clearInterval(interval)
 
   const url = new URL(plugin.launchUrl)
   const devServerUrl = url.searchParams.get('url')
 
-  t.is(url.protocol, 'https:', 'launch url is https')
-  t.is(devServerUrl, plugin.devServerUrl, 'launch url has the correct devServerUrl')
+  expect(url.protocol).toBe('https:')
+  expect(devServerUrl).toBe(plugin.devServerUrl)
   await server.close()
-})
+}, 10000)
 
-test('plugin creates bundle file "bundle.tgz" when building', async t => {
-  t.timeout(10000, 'timeout occurred!')
-
+test('plugin creates bundle file "bundle.tgz" when building', async () => {
   const testBaseDir: string = resolve(tmpDir, uuid())
 
   const folders: Record<string, string> = Object.entries({ srcDir: `${testBaseDir}/src`, outDir: `${testBaseDir}/dist` })
@@ -99,19 +96,19 @@ test('plugin creates bundle file "bundle.tgz" when building', async t => {
   })
 
   const chunk = output?.output.find((t: any) => t?.type === 'chunk')
-  t.is(typeof chunk, 'object', 'chunk is an object')
+  expect(typeof chunk).toBe('object')
 
   const assetFilename: string = (chunk.fileName ?? '').split('/')[1]
-  t.true(assetFilename !== undefined, 'assetFilename is not undefined')
+  expect(assetFilename).not.toBeUndefined()
 
   const outDirEntries = readdirSync(folders.outDir)
   const assetsDirEntries = readdirSync(assetsDir)
 
-  t.true(outDirEntries.length === 4, 'outDir has 4 entries')
-  t.true(assetsDirEntries.length === 1, 'assetsDir has 1 entry')
-  t.is(assetsDirEntries[0], assetFilename, 'generate asset file is in assets folder')
+  expect(outDirEntries.length).toBe(4)
+  expect(assetsDirEntries.length).toBe(1)
+  expect(assetsDirEntries[0]).toBe(assetFilename)
+  expect(outDirEntries.includes('bundle.tgz')).toBe(true)
 
-  t.true(outDirEntries.includes('bundle.tgz'), '"bundle.tgz" was generated')
   const fileStream = createReadStream(resolve(folders.outDir, 'bundle.tgz'))
 
   const bundleFiles = await new Promise<ReadEntry[]>((resolve, reject) => {
@@ -120,16 +117,19 @@ test('plugin creates bundle file "bundle.tgz" when building', async t => {
     fileStream.on('error', err => reject(err))
     fileStream.on('end', () => { resolve(entries) })
   })
+  expect(bundleFiles.length).toBe(4)
 
-  t.is(bundleFiles.length, 4, 'bundle file has 4 entries')
   const assetDirectory = bundleFiles.find(({ path, type }) => type === 'Directory' && path === `${assetsFolder}/`)
-  t.true(assetDirectory !== undefined, `bundle includes asset directory "/${assetsFolder}"`)
+  expect(assetDirectory).not.toBeUndefined()
+
   const indexHtmlFile = bundleFiles.find(({ path, type }) => type === 'File' && path === 'index.html')
-  t.true(indexHtmlFile !== undefined, 'bundle includes file "index.html"')
+  expect(indexHtmlFile).not.toBeUndefined()
+
   const metadataJsonFile = bundleFiles.find(({ path, type }) => type === 'File' && path === 'lxreport.json')
-  t.true(metadataJsonFile !== undefined, 'bundle includes metadata file "lxreport.json"')
+  expect(metadataJsonFile).not.toBeUndefined()
+
   const assetFile = bundleFiles.find(({ path, type }) => type === 'File' && path === `${assetsFolder}/${assetFilename}`)
-  t.true(assetFile !== undefined, `bundle includes generated asset file "${assetsFolder}/${assetFilename}"`)
+  expect(assetFile).not.toBeUndefined()
 
   Object.values(folders).forEach(path => rmSync(path, { recursive: true }))
-})
+}, 10000)

@@ -7,13 +7,13 @@
     "upload": "tsc && vite build"
   },
   "dependencies": {
-    "preact": "^10.6.4",
-    "@leanix/reporting": "^0.4.94"
+    "preact": "^10.10.0",
+    "@leanix/reporting": "^0.4.109"
   },
   "devDependencies": {
-    "@preact/preset-vite": "^2.1.7",
-    "typescript": "^4.5.4",
-    "vite": "^2.7.10",
+    "@preact/preset-vite": "^2.3.0",
+    "typescript": "^4.7.4",
+    "vite": "^2.9.14",
     "vite-plugin-lxr": "^0.0.3"
   }
 }
