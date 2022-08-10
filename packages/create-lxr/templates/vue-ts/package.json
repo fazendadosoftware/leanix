@@ -11,11 +11,11 @@
     "@leanix/reporting": "^0.4.109"
   },
   "devDependencies": {
-    "vite-plugin-lxr": "^0.0.3",
+    "vite-plugin-lxr": "^0.0.4",
     "@vitejs/plugin-vue": "^2.3.3",
     "@vue/compiler-sfc": "^3.2.37",
     "typescript": "^4.7.4",
-    "vite": "^3.0.4",
+    "vite": "^3.0.5",
     "vue-tsc": "^0.30.6"
   }
 }

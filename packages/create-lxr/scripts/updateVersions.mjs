@@ -11,6 +11,9 @@ const __dirname = dirname(__filename)
 const currentLeanIXVitePluginVersion = vitePackageJson.version
 const log = console.log
 
+// force package upgrade, with eventual breaking changes
+const FORCE_UPGRADE = true
+
   ; (async () => {
   const templateDir = join('..', 'templates')
   const templates = readdirSync(join(__dirname, templateDir))
@@ -42,13 +45,16 @@ const log = console.log
           updates.push(`✔️  ${chalk.green.bold(dependency)}: ${requiredRange} to ^${wanted}`)
         }
         if (semver.gtr(gtVersion, requiredRange)) {
-          upgrades.push(`⚠️  upgrade-available for ${chalk.redBright.bold(dependency)}: ${requiredRange} to ^${gtVersion}`)
+          if (!FORCE_UPGRADE) upgrades.push(`⚠️  upgrade-available for ${chalk.redBright.bold(dependency)}: ${requiredRange} to ^${gtVersion}`)
+          else {
+            pkg[key][dependency] = `^${gtVersion}`
+            upgrades.push(`⚠️  upgraded (may have breaking changes...) ${chalk.redBright.bold(dependency)}: ${requiredRange} to ^${gtVersion}`)
+          }
         }
       }
     }
-    console.log('PACKAGE', pkg.devDependencies)
     if (pkg.devDependencies['vite-plugin-lxr'] !== `^${currentLeanIXVitePluginVersion}`) {
-      pkg.devDependencies['vite-plugin-lxr'] = currentLeanIXVitePluginVersion
+      pkg.devDependencies['vite-plugin-lxr'] = `^${currentLeanIXVitePluginVersion}`
       updates.push(`➕  Added ${chalk.green.bold('vite-plugin-lxr')} ^${currentLeanIXVitePluginVersion} to ${chalk.bold('devDependencies')}`)
     }
     if (updates.length > 0) writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n')

@@ -7,8 +7,8 @@
     "upload": "vite build"
   },
   "devDependencies": {
-    "vite": "^3.0.4",
-    "vite-plugin-lxr": "^0.0.3"
+    "vite": "^3.0.5",
+    "vite-plugin-lxr": "^0.0.4"
   },
   "dependencies": {
     "@leanix/reporting": "^0.4.109"
