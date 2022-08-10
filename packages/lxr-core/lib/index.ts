@@ -92,7 +92,11 @@ export const validateDocument = async (document: any, name: 'lxr.json' | 'lxrepo
       schema = null
   }
   if (schema === null) throw Error(`unknown document name ${name}`)
-  const result = validate(document, schema, { throwAll: true })
+  const result = validate(document, schema, { throwAll: false })
+  if (!result.valid) {
+    const errorMsg = `💥 ${name} - ${result.errors.map(({ message }) => message).join(', ')}`
+    throw Error(errorMsg)
+  }
   return result
 }
 
@@ -101,7 +105,6 @@ export const readLxrJson = async (path?: string): Promise<LeanIXCredentials> => 
   const { host, apitoken } = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
   const credentials: LeanIXCredentials = { host, apitoken }
   await validateDocument(credentials, 'lxr.json')
-  validate(credentials, LeanIXCredentialsSchema, { throwAll: true })
   return credentials
 }
 

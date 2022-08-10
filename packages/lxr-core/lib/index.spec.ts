@@ -29,6 +29,11 @@ test('validate "lxr.json" and "lxreport.json" against document schemas', async (
   await expect(async () => await validateDocument({ host: 'demo-us.leanix.net' }, 'lxr.json')).rejects.toThrowError()
 })
 
+test('readLxrJson throws error if json file doesn\'t have all required fields', async () => {
+  const credentials = await readLxrJson(LXR_JSON_PATH)
+  console.log('CREDENTIASL', credentials)
+})
+
 test('getAccessToken returns a token', async () => {
   const credentials = await readLxrJson(LXR_JSON_PATH)
   const accessToken = await getAccessToken(credentials)
