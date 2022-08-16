@@ -14,8 +14,7 @@
             "properties": {
                 "defaultConfig": {
                     "additionalProperties": true,
-                    "properties": {
-                    },
+                    "properties": {},
                     "title": "defaultConfig",
                     "type": "object"
                 },

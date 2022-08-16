@@ -5,7 +5,7 @@
     "./packages/*"
   ],
   "engines": {
-    "node": ">=12.0.0"
+    "node": ">=18.4.0"
   },
   "author": {
     "name": "Paulo dos Santos",
@@ -15,38 +15,39 @@
   "scripts": {
     "lint": "eslint packages/*",
     "fix": "eslint packages/* --fix",
+    "clean:all": "npm run clean & rimraf \"**/node_modules\"",
     "clean": "rimraf \"packages/**/dist\" \"**/*.tsbuildinfo\" \"**/*.tgz\" \"**/.temp\" \"**/.rollup.cache\"",
     "build": "npm run build:core && npm run build:secondary",
     "build:core": "npm run build -w=lxr-core",
     "build:vite-plugin": "npm run build -w=vite-plugin-lxr",
     "build:create-lxr": "npm run build -w=create-lxr",
     "build:secondary": "npm run build:vite-plugin & npm run build:create-lxr",
-    "test": "ava",
+    "test": "vitest --run",
     "publish": "npm run clean && npm run build && npm run test && npm publish --access=public --workspaces",
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@types/node": "^14.11.2",
-    "ava": "^3.15.0",
-    "eslint": "^7.32.0",
+    "@rollup/plugin-commonjs": "^22.0.1",
+    "@rollup/plugin-json": "^4.1.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@types/node": "^18.6.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "app-root-path": "^3.0.0",
+    "eslint": "^8.0.1",
     "eslint-config-standard-with-typescript": "^20.0.0",
     "eslint-define-config": "^1.0.9",
-    "eslint-plugin-import": "^2.24.1",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^5.1.0",
-    "husky": "^7.0.0",
-    "ts-node": "^10.2.1",
-    "typescript": "^4.4.3"
-  },
-  "ava": {
-    "files": [
-      "packages/**/*.spec.ts"
-    ],
-    "extensions": [
-      "ts"
-    ],
-    "require": [
-      "ts-node/register"
-    ]
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-n": "^15.0.0",
+    "eslint-plugin-promise": "^6.0.0",
+    "husky": "^8.0.1",
+    "rollup": "^2.77.2",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-preserve-shebang": "^1.0.1",
+    "rollup-plugin-summary": "^1.4.3",
+    "rollup-plugin-terser": "^7.0.2",
+    "rollup-plugin-typescript2": "^0.32.1",
+    "typescript": "^4.7.4",
+    "vite": "^3.0.4",
+    "vitest": "^0.20.3"
   }
 }

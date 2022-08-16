@@ -1,7 +1,7 @@
-import test from 'ava'
-import { commandSync, ExecaSyncReturnValue, SyncOptions } from 'execa'
+import { expect, test, beforeEach, afterAll } from 'vitest'
+import { execaCommandSync, ExecaSyncReturnValue, SyncOptions } from 'execa'
 import { mkdirpSync, readdirSync, writeFileSync, statSync } from 'fs-extra'
-import { rmdirSync } from 'fs'
+import { rmSync, existsSync } from 'fs'
 import { join, resolve } from 'path'
 import pkg from '../package.json'
 
@@ -15,7 +15,7 @@ const run = (
   options: SyncOptions<string> = {}
 ): ExecaSyncReturnValue<string> => {
   console.log(args.join(' '))
-  return commandSync(`node ${CLI_PATH} ${args.join(' ')}`, options)
+  return execaCommandSync(`node ${CLI_PATH} ${args.join(' ')}`, options)
 }
 
 // Helper to create a non-empty directory
@@ -43,43 +43,43 @@ const templateFiles = [...getAllFiles(join(CLI_PATH, '..', 'templates', 'vue')),
   .map(file => file === '_gitignore' ? '.gitignore' : file)
   .sort()
 
-test.beforeEach(() => rmdirSync(genPath, { recursive: true }))
-test.after.always(() => rmdirSync(genPath, { recursive: true }))
+beforeEach(() => { if (existsSync(genPath)) rmSync(genPath, { recursive: true }) })
+afterAll(() => { if (existsSync(genPath)) rmSync(genPath, { recursive: true }) })
 
 test('prompts for the project name if none supplied', t => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { stdout, exitCode } = run([])
-  t.true(stdout.includes('Project name:'))
+  expect(stdout.includes('Project name:')).toBe(true)
 })
 
 test('prompts for the framework if none supplied', t => {
   const { stdout } = run([projectName])
-  t.true(stdout.includes('Select a framework:'))
+  expect(stdout.includes('Select a framework:')).toBe(true)
 })
 
 test('prompts for the framework on not supplying a value for --template', t => {
   const { stdout } = run([projectName, '--template'])
-  t.true(stdout.includes('Select a framework:'))
+  expect(stdout.includes('Select a framework:')).toBe(true)
 })
 
 test('prompts for the framework on supplying an invalid template', t => {
   const { stdout } = run([projectName, '--template', 'unknown'])
-  t.true(stdout.includes('"unknown" isn\'t a valid template. Please choose from below:'))
+  expect(stdout.includes('"unknown" isn\'t a valid template. Please choose from below:')).toBe(true)
 })
 
 test('asks to overwrite non-empty target directory', t => {
   createNonEmptyDir()
   const { stdout } = run([projectName], { cwd: __dirname })
-  t.true(stdout.includes(`Target directory "${projectName}" is not empty.`))
+  expect(stdout.includes(`Target directory "${projectName}" is not empty.`)).toBe(true)
 })
 
 test('asks to overwrite non-empty current directory', t => {
   createNonEmptyDir()
   const { stdout } = run(['.'], { cwd: genPath, input: 'test-app\n' })
-  t.true(stdout.includes('Current directory is not empty.'))
+  expect(stdout.includes('Current directory is not empty.')).toBe(true)
 })
 
-test.serial('successfully scaffolds a project based on vue starter template', async t => {
+test('successfully scaffolds a project based on vue starter template', async () => {
   const args = [
     '--template', 'vue',
     '---reportId', 'net.leanix.report',
@@ -95,6 +95,6 @@ test.serial('successfully scaffolds a project based on vue starter template', as
   const generatedFiles = getAllFiles(genPath).sort()
 
   // Assertions
-  t.true(stdout.includes(`Scaffolding project in ${genPath}`))
-  t.deepEqual(generatedFiles, templateFiles)
+  expect(stdout.includes(`Scaffolding project in ${genPath}`)).toBe(true)
+  expect(generatedFiles).toEqual(templateFiles)
 })

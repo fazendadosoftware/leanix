@@ -1,4 +1,4 @@
-import typescript from '@rollup/plugin-typescript'
+import typescript from 'rollup-plugin-typescript2'
 import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
@@ -12,7 +12,7 @@ export default [
   {
     input: 'lib/index.ts',
     plugins: [
-      typescript({ declarationDir: 'dist/types', include: ['lib/**/*'], outputToFilesystem: true }),
+      typescript({ useTsconfigDeclarationDir: true }),
       json({ compact: true }),
       nodeResolve({ preferBuiltins: true }),
       commonjs(),
@@ -26,7 +26,7 @@ export default [
   {
     input: 'lib/index.ts',
     plugins: [
-      typescript({ outDir: 'dist/esm', composite: false, declaration: false, include: ['lib/**/*'], outputToFilesystem: true }),
+      typescript({ outDir: 'dist/esm', composite: false, declaration: false }),
       json({ compact: true }),
       nodeResolve({ preferBuiltins: true }),
       commonjs(),

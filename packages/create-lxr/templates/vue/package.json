@@ -7,13 +7,12 @@
     "upload": "vite build"
   },
   "dependencies": {
-    "vue": "^3.2.26",
-    "@leanix/reporting": "^0.4.94"
+    "vue": "^3.2.37",
+    "@leanix/reporting": "^0.4.109"
   },
   "devDependencies": {
-    "vite-plugin-lxr": "^0.0.3",
-    "@vitejs/plugin-vue": "^2.0.1",
-    "@vue/compiler-sfc": "^3.2.26",
-    "vite": "^2.7.10"
+    "vite-plugin-lxr": "^0.0.4",
+    "@vitejs/plugin-vue": "^3.0.1",
+    "vite": "^3.0.5"
   }
 }

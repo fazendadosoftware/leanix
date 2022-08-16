@@ -6,7 +6,8 @@
     "composite": false,
     // https://stackoverflow.com/questions/61687679/nest-js-build-does-does-not-generate-the-dist-folder
     "incremental": false,
-    "noEmit": false
+    "noEmit": false,
+    "declarationDir": "dist/types"
   },
   "include": ["lib"],
   "exclude": [ "**/*.spec.ts"]
