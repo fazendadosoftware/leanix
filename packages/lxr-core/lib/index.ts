@@ -103,8 +103,9 @@ export const validateDocument = async (document: any, name: 'lxr.json' | 'lxrepo
 
 export const readLxrJson = async (path?: string): Promise<LeanIXCredentials> => {
   if ((path ?? '').length === 0) path = `${process.cwd()}/lxr.json`
-  const { host, apitoken } = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
+  const { host, apitoken, proxyURL = null } = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
   const credentials: LeanIXCredentials = { host, apitoken }
+  if (proxyURL !== null) credentials.proxyURL = proxyURL
   await validateDocument(credentials, 'lxr.json')
   return credentials
 }

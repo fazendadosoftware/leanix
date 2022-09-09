@@ -91,6 +91,9 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
       logger = resolvedConfig.logger
       if (resolvedConfig.command === 'serve' || resolvedConfig.isProduction) {
         try {
+          if (typeof credentials.proxyURL === 'string') {
+            logger?.info(`👀 vite-plugin is using the following proxy: ${credentials.proxyURL}`)
+          }
           accessToken = await getAccessToken(credentials)
           claims = getAccessTokenClaims(accessToken)
           if (claims !== null) logger?.info(`🔥 Your workspace is ${claims.principal.permission.workspaceName}`)
