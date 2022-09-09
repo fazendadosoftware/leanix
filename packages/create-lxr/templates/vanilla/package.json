@@ -7,10 +7,10 @@
     "upload": "vite build"
   },
   "devDependencies": {
-    "vite": "^3.0.5",
-    "vite-plugin-lxr": "^0.0.4"
+    "vite": "^3.1.0",
+    "vite-plugin-lxr": "^0.0.5"
   },
   "dependencies": {
-    "@leanix/reporting": "^0.4.109"
+    "@leanix/reporting": "^0.4.118"
   }
 }
