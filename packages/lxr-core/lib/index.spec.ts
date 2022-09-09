@@ -1,9 +1,10 @@
-import { expect, test } from 'vitest'
+import { beforeAll, expect, test } from 'vitest'
 import appRoot from 'app-root-path'
 import { URL } from 'url'
 import { resolve } from 'path'
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs'
 import { ReadEntry, t as tarT } from 'tar'
+import ProxyServer from 'transparent-proxy'
 import { validateDocument, readLxrJson, getAccessToken, getLaunchUrl, createBundle, CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, uploadBundle } from './index'
 
 const LXR_JSON_PATH = resolve(appRoot.path, 'lxr.json')
@@ -19,6 +20,20 @@ const getDummyReportMetadata = (): CustomReportMetadata => ({
   defaultConfig: {}
 })
 
+let proxy: any
+let proxyPort: number = 0
+
+beforeAll(async () => {
+  await new Promise<void>((resolve, reject) => {
+    proxy = new ProxyServer()
+    proxy.listen(() => {
+      proxyPort = proxy.address().port
+      console.log('proxy started')
+      resolve()
+    })
+  })
+})
+
 test('validate "lxr.json" and "lxreport.json" against document schemas', async () => {
   const validMetadataDocument = getDummyReportMetadata()
   const invalidMetadataDocument = { ...validMetadataDocument, id: undefined }
@@ -30,12 +45,25 @@ test('validate "lxr.json" and "lxreport.json" against document schemas', async (
 })
 
 test('readLxrJson throws error if json file doesn\'t have all required fields', async () => {
-  const credentials = await readLxrJson(LXR_JSON_PATH)
-  console.log('CREDENTIASL', credentials)
+  await readLxrJson(LXR_JSON_PATH)
 })
 
 test('getAccessToken returns a token', async () => {
   const credentials = await readLxrJson(LXR_JSON_PATH)
+  const accessToken = await getAccessToken(credentials)
+  expect(typeof accessToken.accessToken).toBe('string') // accessToken is a string
+  expect(accessToken.accessToken).toBeTruthy()
+  expect(typeof accessToken.expired).toBe('boolean')
+  expect(accessToken.expired).toBe(false)
+  expect(typeof accessToken.expiresIn).toBe('number')
+  expect(accessToken.expiresIn > 0).toBe(true)
+  expect(typeof accessToken.scope).toBe('string')
+  expect(accessToken.tokenType).toBe('bearer')
+})
+
+test('getAccessToken with proxy returns a token', async () => {
+  const credentials = await readLxrJson(LXR_JSON_PATH)
+  credentials.proxyURL = `http://127.0.0.1:${proxyPort}`
   const accessToken = await getAccessToken(credentials)
   expect(typeof accessToken.accessToken).toBe('string') // accessToken is a string
   expect(accessToken.accessToken).toBeTruthy()
