@@ -14,11 +14,11 @@
     "leanix"
   ],
   "scripts": {
-    "build": "rollup -c rollup.config.js"
+    "build": "rollup -c rollup.config.mjs"
   },
   "peerDependencies": {
-    "typescript": "^4.7.4",
-    "vite": "^3.0.4"
+    "typescript": "^4.8.4",
+    "vite": "^3.2.2"
   },
   "devDependencies": {
     "@types/node-forge": "^1.0.4",

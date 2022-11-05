@@ -5,6 +5,7 @@ import jwtDecode from 'jwt-decode'
 import FormData from 'form-data'
 import { c } from 'tar'
 import { resolve } from 'path'
+// import { readFile } from 'fs/promises'
 import { existsSync, writeFileSync, readdirSync, createReadStream, ReadStream, readFileSync } from 'fs'
 import { URL } from 'url'
 import { validate, ValidatorResult } from 'jsonschema'
@@ -111,6 +112,14 @@ export const readLxrJson = async (path?: string): Promise<LeanIXCredentials> => 
 }
 
 export const readMetadataJson = async (path: string = `${process.cwd()}/package.json`): Promise<CustomReportMetadata> => {
+  // https://www.stefanjudis.com/snippets/how-to-import-json-files-in-es-modules-node-js/
+  /*
+  const pkg: PackageJsonLXR = JSON.parse(
+    await readFile(
+      new URL(path, import.meta.url)
+    ).then(buffer => buffer.toString())
+  )
+  */
   const fileContent = readFileSync(path).toString()
   const pkg: PackageJsonLXR = JSON.parse(fileContent)
   await validateDocument(pkg, 'package.json')

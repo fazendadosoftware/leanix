@@ -11,7 +11,7 @@
   "scripts": {
     "preinstall": "mkdir dist && [[ -f dist/index.js ]] || npx touch dist/index.js",
     "clean": "rimraf dist \"**/.rollup.cache\"",
-    "build": "npm run clean && rollup -c rollup.config.js && chmod -R 777 ./dist/",
+    "build": "npm run clean && rollup -c rollup.config.mjs && chmod -R 777 ./dist/",
     "update:versions": "node scripts/updateVersions.mjs"
   },
   "engines": {
@@ -45,6 +45,6 @@
     "tslib": "^2.4.0"
   },
   "peerDependencies": {
-    "typescript": "^4.7.4"
+    "typescript": "^4.8.4"
   }
 }

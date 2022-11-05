@@ -1,5 +1,7 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, writeFileSync, readdirSync, lstatSync, rmdirSync, unlinkSync, statSync, copyFileSync } from 'fs'
+import { existsSync, mkdirSync, readdirSync, lstatSync, rmdirSync, unlinkSync, statSync, copyFileSync } from 'fs'
+import { readdir, writeFile, readFile } from 'fs/promises'
+import { pathToFileURL } from 'url'
 import { join, resolve, relative } from 'path'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -287,13 +289,16 @@ async function init (argv: Options): Promise<void> {
 
   const templateDir = join(__dirname, 'templates', template)
 
-  const write = (file: string, content?: string): void => {
+  const write = async (file: string, content?: string): Promise<void> => {
     const targetPath = join(root, renameFiles[file] ?? file)
-    if (content !== undefined) writeFileSync(targetPath, content)
+    if (content !== undefined) await writeFile(pathToFileURL(targetPath), content)
     else copy(join(templateDir, file), targetPath)
   }
 
-  readdirSync(templateDir).filter(f => f !== 'package.json').forEach(file => write(file))
+  const templateFiles = await readdir(pathToFileURL(templateDir))
+  await Promise.all(templateFiles
+    .filter(f => f !== 'package.json')
+    .map(async file => await write(file)))
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   let pkg = require(join(templateDir, 'package.json'))
@@ -316,7 +321,8 @@ async function init (argv: Options): Promise<void> {
   }
 
   Object.entries(generatedFiles)
-    .forEach(([filename, content]) => write(filename, JSON.stringify(content, null, 2) + '\n'))
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    .forEach(async ([filename, content]) => await write(filename, JSON.stringify(content, null, 2) + '\n'))
 
   const pkgInfo = pkgFromUserAgent(process.env.npm_config_user_agent)
   const pkgManager = pkgInfo?.name ?? 'npm'

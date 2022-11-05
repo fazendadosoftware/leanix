@@ -3,12 +3,12 @@ import typescript from 'rollup-plugin-typescript2'
 import json from '@rollup/plugin-json'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import commonjs from '@rollup/plugin-commonjs'
-import { terser } from 'rollup-plugin-terser'
-import summary from 'rollup-plugin-summary'
+import terser from '@rollup/plugin-terser'
+// import summary from 'rollup-plugin-summary'
 import copy from 'rollup-plugin-copy'
 import shebang from 'rollup-plugin-preserve-shebang'
 import { normalize } from 'path'
-import pkg from './package.json'
+import pkg from './package.json' assert { type: 'json' }
 
 const moduleName = pkg.name.replace(/^@.*\//, '')
 const inputFileName = 'lib/index.ts'
@@ -48,14 +48,14 @@ export default [
       json({ compact: true }),
       nodeResolve({ preferBuiltins: true }),
       commonjs(),
-      terser({ module: true, warnings: true }),
-      summary()
+      terser({ module: true, warnings: true })
+      // summary()
     ],
     onwarn (warning) {
-      if (warning.code === 'CIRCULAR_DEPENDENCY' && warning.importer.includes(normalize('node_modules/yargs'))) {
+      if (warning.code === 'CIRCULAR_DEPENDENCY' && warning?.importer?.includes(normalize('node_modules/yargs'))) {
         return
       }
-      console.warn(`(!) ${warning.message} ${warning.importer}`)
+      console.warn(`(!) ${warning?.message} ${warning?.importer}`)
     }
   }
 ]
