@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync, readdirSync, lstatSync, rmdirSync, unlinkSync, statSync, copyFileSync } from 'fs'
-import { readdir, writeFile, readFile } from 'fs/promises'
+import { readdir, writeFile } from 'fs/promises'
 import { pathToFileURL } from 'url'
 import { join, resolve, relative } from 'path'
 import yargs from 'yargs'
