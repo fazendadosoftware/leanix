@@ -60,6 +60,8 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
   let claims: JwtClaims | null = null
   let isProduction: boolean = false
   let credentials: LeanIXCredentials = { host: '', apitoken: '' }
+  let viteDevServerUrl: string
+  let launchUrl: string
 
   const defaultCacheDir = 'node_modules/.vite'
 
@@ -111,12 +113,12 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
           const { port } = httpServer.address() as AddressInfo
           const { name: hostname } = resolveHostname(host)
           const protocol = https !== null ? 'https' : 'http'
-          this.devServerUrl = `${protocol}://${hostname}:${port}`
+          viteDevServerUrl = `${protocol}://${hostname}:${port}`
           if (accessToken !== null) {
-            this.launchUrl = getLaunchUrl(this.devServerUrl, accessToken.accessToken)
+            launchUrl = getLaunchUrl(viteDevServerUrl, accessToken.accessToken)
             setTimeout(() => {
               // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-              logger?.info(`🚀 Your development server is available here => ${this.launchUrl}`)
+              logger?.info(`🚀 Your development server is available here => ${launchUrl}`)
             }, 1)
           } else throw Error('💥 Could not get launch url, no accessToken...')
         })

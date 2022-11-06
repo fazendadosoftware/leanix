@@ -1,8 +1,9 @@
 import { expect, test, beforeEach, afterAll } from 'vitest'
 import { execaCommandSync, ExecaSyncReturnValue, SyncOptions } from 'execa'
 import { mkdirpSync, readdirSync, writeFileSync, statSync } from 'fs-extra'
-import { rmSync, existsSync } from 'fs'
+import { rmSync, existsSync, readFileSync } from 'fs'
 import { join, resolve } from 'path'
+import { generate as uuid } from 'short-uuid'
 import pkg from '../package.json'
 
 const CLI_PATH = resolve(__dirname, '..', pkg.bin)
@@ -37,6 +38,8 @@ const getAllFiles = (dirPath: string, arrayOfFiles: string[] = []): string[] => 
   })
   return arrayOfFiles
 }
+
+const getPackageJson = (dirPath: string): any => JSON.parse(readFileSync(join(dirPath, 'package.json')).toString())
 
 // Vue 3 starter template plus 1 generated file: 'lxr.json'
 const templateFiles = [...getAllFiles(join(CLI_PATH, '..', 'templates', 'vue')), 'lxr.json']
@@ -80,21 +83,41 @@ test('asks to overwrite non-empty current directory', t => {
 })
 
 test('successfully scaffolds a project based on vue starter template', async () => {
+  const template = 'vue'
+  const reportId = uuid()
+  const author = uuid()
+  const title = uuid()
+  const description = uuid()
+  const host = uuid()
+  const apitoken = uuid()
+  const proxyURL = uuid()
+
   const args = [
-    '--template', 'vue',
-    '---reportId', 'net.leanix.report',
-    '--author', 'LeanIX GmbH',
-    '--title', 'Report Title',
-    '--description', 'Report Description',
-    '--host', 'app.leanix.net',
-    '--apitoken', 'apitoken',
-    '--proxyURL', 'iojfowjio'
+    '--template', template,
+    '--reportId', reportId,
+    '--author', author,
+    '--title', title,
+    '--description', description,
+    '--host', host,
+    '--apitoken', apitoken,
+    '--proxyURL', proxyURL
   ]
+
   const { stdout, stderr } = run([projectName, ...args], { cwd: __dirname })
+  expect(typeof stderr).equal('string')
 
   const generatedFiles = getAllFiles(genPath).sort()
 
   // Assertions
   expect(stdout.includes(`Scaffolding project in ${genPath}`)).toBe(true)
   expect(generatedFiles).toEqual(templateFiles)
+
+  const pkg = getPackageJson(genPath)
+  expect(pkg.name).toEqual(projectName)
+  expect(pkg.author).toEqual(author)
+  expect(pkg.description).toEqual(description)
+  expect(pkg.version).toEqual('0.0.0')
+  expect(pkg?.leanixReport?.id).toEqual(reportId)
+  expect(pkg?.leanixReport?.title).toEqual(title)
+  expect(typeof pkg?.leanixReport.defaultConfig).toEqual('object')
 })

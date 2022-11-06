@@ -7,11 +7,11 @@
     "upload": "tsc && vite build"
   },
   "devDependencies": {
-    "typescript": "^4.8.3",
-    "vite": "^3.1.0",
-    "vite-plugin-lxr": "^0.0.6"
+    "typescript": "^4.8.4",
+    "vite": "^3.2.2",
+    "vite-plugin-lxr": "^0.0.7"
   },
   "dependencies": {
-    "@leanix/reporting": "^0.4.118"
+    "@leanix/reporting": "^0.4.120"
   }
 }

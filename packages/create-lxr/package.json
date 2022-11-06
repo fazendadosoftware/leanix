@@ -1,6 +1,6 @@
 {
   "name": "create-lxr",
-  "version": "0.0.32",
+  "version": "0.0.35",
   "license": "MIT",
   "author": "Paulo dos Santos",
   "bin": "dist/index.js",
@@ -11,7 +11,7 @@
   "scripts": {
     "preinstall": "mkdir dist && [[ -f dist/index.js ]] || npx touch dist/index.js",
     "clean": "rimraf dist \"**/.rollup.cache\"",
-    "build": "npm run clean && rollup -c rollup.config.js && chmod -R 777 ./dist/",
+    "build": "npm run clean && rollup -c rollup.config.mjs && chmod -R 777 ./dist/",
     "update:versions": "node scripts/updateVersions.mjs"
   },
   "engines": {
@@ -27,24 +27,24 @@
   },
   "homepage": "https://github.com/fazendadosoftware/leanix/tree/main/packages/create-lxr#readme",
   "dependencies": {
-    "chalk": "^5.0.1",
-    "kolorist": "^1.5.1",
-    "minimist": "^1.2.6",
+    "chalk": "^5.1.2",
+    "cross-spawn": "^7.0.3",
+    "kolorist": "^1.6.0",
+    "minimist": "^1.2.7",
     "prompts": "^2.4.2",
-    "yargs": "^17.5.1"
+    "short-uuid": "^4.2.2",
+    "yargs": "^17.6.2"
   },
   "devDependencies": {
+    "@types/cross-spawn": "^6.0.2",
     "@types/fs-extra": "^9.0.13",
     "@types/prompts": "^2.0.14",
-    "@types/yargs": "^17.0.2",
+    "@types/yargs": "^17.0.13",
     "execa": "^6.1.0",
     "fs-extra": "^10.1.0",
     "package-json": "^7.0.0",
     "semver": "^7.3.7",
     "touch": "^3.1.0",
     "tslib": "^2.4.0"
-  },
-  "peerDependencies": {
-    "typescript": "^4.7.4"
   }
 }
