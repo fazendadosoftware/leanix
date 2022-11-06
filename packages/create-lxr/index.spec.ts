@@ -5,7 +5,7 @@ import { mkdirpSync, readdirSync, writeFileSync, statSync } from 'fs-extra'
 import { rmSync, existsSync, readFileSync } from 'fs'
 import { join, resolve } from 'path'
 import { generate as uuid } from 'short-uuid'
-import pkg from './package.json'
+import pkg from './package.json' assert { type: 'json' }
 
 const CLI_PATH = resolve(__dirname, pkg.bin)
 

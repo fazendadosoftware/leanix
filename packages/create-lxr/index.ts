@@ -4,7 +4,7 @@ import * as path from 'node:path'
 
 import minimist from 'minimist'
 import prompts from 'prompts'
-import { yellow, green, blue, red, cyan, magenta, reset } from 'kolorist'
+import { yellow, green, blue, red, cyan, reset } from 'kolorist'
 
 import { pathToFileURL } from 'url'
 import { join, resolve, relative } from 'path'
