@@ -80,13 +80,15 @@ const FRAMEWORKS: IFramework[] = [
         name: 'vue-ts',
         display: 'TypeScript',
         color: blue
-      },
+      }
+      /*
       {
         name: 'custom-create-vue',
         display: 'Customize with create-vue ↗',
         color: green,
         customCommand: 'npm create vue@latest TARGET_DIR'
       }
+      */
     ]
   },
   {
@@ -139,7 +141,8 @@ const FRAMEWORKS: IFramework[] = [
         color: blue
       }
     ]
-  },
+  }
+  /*
   {
     name: 'others',
     display: 'Others',
@@ -153,6 +156,7 @@ const FRAMEWORKS: IFramework[] = [
       }
     ]
   }
+  */
 ]
 
 const TEMPLATES = FRAMEWORKS
