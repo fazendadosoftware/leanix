@@ -1,118 +1,15 @@
 #!/usr/bin/env node
-import { existsSync, mkdirSync, readdirSync, lstatSync, rmdirSync, unlinkSync, statSync, copyFileSync } from 'fs'
+import { existsSync, mkdirSync, readFileSync, readdirSync, lstatSync, rmdirSync, unlinkSync, statSync, copyFileSync } from 'fs'
 import { readdir, writeFile } from 'fs/promises'
+import path from 'node:path'
 import { pathToFileURL } from 'url'
 import { join, resolve, relative } from 'path'
+import prompts from 'prompts'
+import spawn from 'cross-spawn'
+import { yellow, green, blue, red, cyan, magenta, reset } from 'kolorist'
+import { validateDocument } from 'lxr-core'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import prompts from 'prompts'
-import { yellow, green, blue, red, cyan, magenta } from 'kolorist'
-import { validateDocument } from 'lxr-core'
-
-const cwd = process.cwd()
-
-interface FrameworkVariant {
-  name: string
-  display: string
-  color: (str: string | number) => string
-}
-
-interface Framework {
-  name: string
-  color: (str: string | number) => string
-  variants: FrameworkVariant[]
-}
-
-const FRAMEWORKS: Framework[] = [
-  {
-    name: 'vanilla',
-    color: yellow,
-    variants: [
-      {
-        name: 'vanilla',
-        display: 'JavaScript',
-        color: yellow
-      },
-      {
-        name: 'vanilla-ts',
-        display: 'TypeScript',
-        color: blue
-      }
-    ]
-  },
-  {
-    name: 'vue',
-    color: green,
-    variants: [
-      {
-        name: 'vue',
-        display: 'JavaScript',
-        color: yellow
-      },
-      {
-        name: 'vue-ts',
-        display: 'TypeScript',
-        color: blue
-      }
-    ]
-  },
-  {
-    name: 'react',
-    color: cyan,
-    variants: [
-      {
-        name: 'react',
-        display: 'JavaScript',
-        color: yellow
-      },
-      {
-        name: 'react-ts',
-        display: 'TypeScript',
-        color: blue
-      }
-    ]
-  },
-  {
-    name: 'preact',
-    color: magenta,
-    variants: [
-      {
-        name: 'preact',
-        display: 'JavaScript',
-        color: yellow
-      },
-      {
-        name: 'preact-ts',
-        display: 'TypeScript',
-        color: blue
-      }
-    ]
-  },
-  {
-    name: 'svelte',
-    color: red,
-    variants: [
-      {
-        name: 'svelte',
-        display: 'JavaScript',
-        color: yellow
-      },
-      {
-        name: 'svelte-ts',
-        display: 'TypeScript',
-        color: blue
-      }
-    ]
-  }
-]
-
-const TEMPLATES = FRAMEWORKS
-  .map(({ name, variants }) => Array.isArray(variants) ? variants.map(({ name }) => name) : [name])
-  .flat()
-
-const renameFiles: Record<string, string> = {
-  _gitignore: '.gitignore'
-}
 
 interface Options {
   targetDir?: string
@@ -133,48 +30,181 @@ interface PromptResult extends Options {
   variant?: string
 }
 
-const getLeanIXQuestions = (options?: Options): Array<prompts.PromptObject<string>> => ([
+const cwd = process.cwd()
+
+type ColorFunc = (str: string | number) => string
+
+interface IFrameworkBase {
+  name: string
+  display: string
+  color: ColorFunc
+}
+
+interface IFrameworkVariant extends IFrameworkBase {
+  customCommand?: string
+}
+
+interface IFramework extends IFrameworkBase {
+  variants: IFrameworkVariant[]
+}
+
+const FRAMEWORKS: IFramework[] = [
+  {
+    name: 'vanilla',
+    display: 'Vanilla',
+    color: yellow,
+    variants: [
+      {
+        name: 'vanilla',
+        display: 'JavaScript',
+        color: yellow
+      },
+      {
+        name: 'vanilla-ts',
+        display: 'TypeScript',
+        color: blue
+      }
+    ]
+  },
+  {
+    name: 'vue',
+    display: 'Vue',
+    color: green,
+    variants: [
+      {
+        name: 'vue',
+        display: 'JavaScript',
+        color: yellow
+      },
+      {
+        name: 'vue-ts',
+        display: 'TypeScript',
+        color: blue
+      },
+      {
+        name: 'custom-create-vue',
+        display: 'Customize with create-vue ↗',
+        color: green,
+        customCommand: 'npm create vue@latest TARGET_DIR'
+      }
+    ]
+  },
+  {
+    name: 'react',
+    display: 'React',
+    color: cyan,
+    variants: [
+      {
+        name: 'react',
+        display: 'JavaScript',
+        color: yellow
+      },
+      {
+        name: 'react-ts',
+        display: 'TypeScript',
+        color: blue
+      }
+    ]
+  },
+  {
+    name: 'preact',
+    display: 'Preact',
+    color: magenta,
+    variants: [
+      {
+        name: 'preact',
+        display: 'JavaScript',
+        color: yellow
+      },
+      {
+        name: 'preact-ts',
+        display: 'TypeScript',
+        color: blue
+      }
+    ]
+  },
+  {
+    name: 'svelte',
+    display: 'Svelte',
+    color: red,
+    variants: [
+      {
+        name: 'svelte',
+        display: 'JavaScript',
+        color: yellow
+      },
+      {
+        name: 'svelte-ts',
+        display: 'TypeScript',
+        color: blue
+      }
+    ]
+  },
+  {
+    name: 'others',
+    display: 'Others',
+    color: reset,
+    variants: [
+      {
+        name: 'create-vite-extra',
+        display: 'create-vite-extra ↗',
+        color: reset,
+        customCommand: 'npm create vite-extra@latest TARGET_DIR'
+      }
+    ]
+  }
+]
+
+const TEMPLATES = FRAMEWORKS
+  .map(({ name, variants }) => Array.isArray(variants) ? variants.map(({ name }) => name) : [name])
+  .flat()
+
+const renameFiles: Record<string, string> = {
+  _gitignore: '.gitignore'
+}
+
+const getLeanIXQuestions = (options: Options): Array<prompts.PromptObject<string>> => ([
   {
     type: options?.reportId === undefined ? 'text' : null,
     name: 'reportId',
-    message: 'Unique id for this report in Java package notation (e.g. net.leanix.barcharts)'
+    message: reset('Unique id for this report in Java package notation (e.g. net.leanix.barcharts)')
   },
   {
     type: options?.author === undefined ? 'text' : null,
     name: 'author',
-    message: 'Who is the author of this report (e.g. LeanIX GmbH)'
+    message: reset('Who is the author of this report (e.g. LeanIX GmbH)')
   },
   {
     type: options?.title === undefined ? 'text' : null,
     name: 'title',
-    message: 'A title to be shown in LeanIX when report is installed'
+    message: reset('A title to be shown in LeanIX when report is installed')
   },
   {
     type: options?.description === undefined ? 'text' : null,
     name: 'description',
-    message: 'Description of your project'
+    message: reset('Description of your project')
   },
   {
     type: options?.host === undefined ? 'text' : null,
     name: 'host',
     initial: 'app.leanix.net',
-    message: 'Which host do you want to work with?'
+    message: reset('Which host do you want to work with?')
   },
   {
     type: options?.apitoken === undefined ? 'text' : null,
     name: 'apitoken',
-    message: 'API-Token for Authentication (see: https://dev.leanix.net/docs/authentication#section-generate-api-tokens)'
+    message: reset('API-Token for Authentication (see: https://dev.leanix.net/docs/authentication#section-generate-api-tokens)')
   },
   {
     type: options?.proxyURL === undefined ? 'confirm' : null,
     name: 'behindProxy',
-    message: 'Are you behind a proxy?',
+    message: reset('Are you behind a proxy?'),
     initial: false
   },
   {
     type: (prev: boolean) => prev && 'text',
     name: 'proxyURL',
-    message: 'Proxy URL?'
+    message: reset('Proxy URL?')
   }
 ])
 
@@ -186,16 +216,16 @@ async function init (argv: Options): Promise<void> {
   const defaultProjectName = targetDir ?? 'leanix-custom-report'
 
   let result: PromptResult = {}
+
   try {
     result = await prompts(
       [
         {
           type: targetDir !== null ? null : 'text',
           name: 'projectName',
-          message: 'Project name:',
+          message: reset('Project name:'),
           initial: defaultProjectName,
-          // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-          onState: state => (targetDir = state.value.trim() || defaultProjectName)
+          onState: state => (targetDir = state.value.trim() ?? defaultProjectName)
         },
         {
           type: () => targetDir !== null && (!existsSync(targetDir) || isEmpty(targetDir)) ? null : 'confirm',
@@ -207,8 +237,7 @@ async function init (argv: Options): Promise<void> {
             ' is not empty. Remove existing files and continue?'
         },
         {
-          // @ts-expect-error
-          type: (_, { overwrite } = {}) => {
+          type: (_, { overwrite }: { overwrite?: boolean }) => {
             if (overwrite === false) throw new Error(red('✖') + ' Operation cancelled')
             return null
           },
@@ -217,35 +246,35 @@ async function init (argv: Options): Promise<void> {
         {
           type: () => (targetDir !== null && isValidPackageName(targetDir) ? null : 'text'),
           name: 'packageName',
-          message: 'Package name:',
+          message: reset('Package name:'),
           initial: () => toValidPackageName(targetDir ?? ''),
-          validate: dir => isValidPackageName(dir) || 'Invalid package.json name'
+          validate: dir => isValidPackageName(dir) ?? 'Invalid package.json name'
         },
         {
           type: (template != null) && TEMPLATES.includes(template) ? null : 'select',
           name: 'framework',
           message:
             typeof template === 'string' && !TEMPLATES.includes(template)
-              ? `"${template}" isn't a valid template. Please choose from below: `
-              : 'Select a framework:',
+              ? reset(`"${template}" isn't a valid template. Please choose from below: `)
+              : reset('Select a framework:'),
           initial: 0,
-          choices: FRAMEWORKS.map((framework: Framework) => {
+          choices: FRAMEWORKS.map(framework => {
             const frameworkColor = framework.color
             return {
-              title: frameworkColor(framework.name),
+              title: frameworkColor(framework.display ?? framework.name),
               value: framework
             }
           })
         },
         {
-          type: framework => framework?.variants !== undefined ? 'select' : null,
+          type: (framework: IFramework) => framework?.variants !== undefined ? 'select' : null,
           name: 'variant',
-          message: 'Select a variant:',
-          choices: (framework: Framework) => framework.variants
+          message: reset('Select a variant:'),
+          choices: (framework: IFramework) => framework.variants
             .map(variant => {
               const variantColor = variant.color
               return {
-                title: variantColor(variant.name),
+                title: variantColor(variant.display ?? variant.name),
                 value: variant.name
               }
             })
@@ -264,7 +293,7 @@ async function init (argv: Options): Promise<void> {
   }
 
   // user choice associated with prompts
-  const { framework, overwrite, packageName, variant } = result;
+  const { framework, overwrite, packageName, variant = null } = result;
   // leanix-specific answers
   ({
     reportId = reportId,
@@ -283,7 +312,39 @@ async function init (argv: Options): Promise<void> {
 
   // determine template
   template = variant ?? framework ?? template
-  if (template === null) throw Error('unknown template')
+  if (template === null) throw new Error('unknown template')
+
+  const pkgInfo = pkgFromUserAgent(process.env.npm_config_user_agent) ?? null
+  const pkgManager = (pkgInfo != null) ? pkgInfo.name : 'npm'
+  const isYarn1 = (pkgManager === 'yarn' && pkgInfo?.version.startsWith('1.')) ?? false
+
+  const { customCommand = null } = FRAMEWORKS.flatMap(f => f.variants).find((v) => v.name === template) ?? {}
+
+  if (customCommand !== null) {
+    const fullCustomCommand = customCommand
+      .replace('TARGET_DIR', root)
+      .replace(/^npm create/, `${pkgManager} create`)
+      // Only Yarn 1.x doesn't support `@version` in the `create` command
+      .replace('@latest', () => (isYarn1 ? '' : '@latest'))
+      .replace(/^npm exec/, () => {
+        // Prefer `pnpm dlx` or `yarn dlx`
+        if (pkgManager === 'pnpm') {
+          return 'pnpm dlx'
+        }
+        if (pkgManager === 'yarn' && !isYarn1) {
+          return 'yarn dlx'
+        }
+        // Use `npm exec` in all other cases,
+        // including Yarn 1.x and other custom npm clients.
+        return 'npm exec'
+      })
+
+    const [command, ...args] = fullCustomCommand.split(' ')
+    const { status } = spawn.sync(command, args, {
+      stdio: 'inherit'
+    })
+    process.exit(status ?? 0)
+  }
 
   console.log(`\nScaffolding project in ${root}...`)
 
@@ -296,16 +357,15 @@ async function init (argv: Options): Promise<void> {
   }
 
   const templateFiles = await readdir(pathToFileURL(templateDir))
-  await Promise.all(templateFiles
-    .filter(f => f !== 'package.json')
-    .map(async file => await write(file)))
+  for (const file of templateFiles.filter(f => f !== 'package.json')) {
+    await write(file)
+  }
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  let pkg = require(join(templateDir, 'package.json'))
+  // let pkg = require(join(templateDir, 'package.json'))
+  let pkg = JSON.parse(readFileSync(path.join(templateDir, 'package.json'), 'utf-8'))
 
-  const reportName = packageName ?? targetDir
-
-  const pkgMetadataFields = { name: reportName, author, description, version: pkg.version }
+  const pkgMetadataFields = { name: packageName ?? targetDir, author, description, version: pkg.version }
   const leanixReport = { id: reportId, title, defaultConfig: {} }
 
   pkg = { ...pkg, ...pkgMetadataFields, leanixReport }
@@ -323,9 +383,6 @@ async function init (argv: Options): Promise<void> {
   Object.entries(generatedFiles)
     // eslint-disable-next-line @typescript-eslint/no-misused-promises
     .forEach(async ([filename, content]) => await write(filename, JSON.stringify(content, null, 2) + '\n'))
-
-  const pkgInfo = pkgFromUserAgent(process.env.npm_config_user_agent)
-  const pkgManager = pkgInfo?.name ?? 'npm'
 
   console.log('\nDone. Now run:\n')
   if (root !== cwd) {
@@ -387,10 +444,6 @@ const emptyDir = (dir: string): void => {
     })
 }
 
-/**
- * @param {string | undefined} userAgent process.env.npm_config_user_agent
- * @returns object | undefined
- */
 const pkgFromUserAgent = (userAgent?: string): { name: string, version: string } | undefined => {
   if (userAgent === undefined) return undefined
   const pkgSpec = userAgent.split(' ')[0]

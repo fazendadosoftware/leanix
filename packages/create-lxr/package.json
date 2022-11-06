@@ -27,24 +27,23 @@
   },
   "homepage": "https://github.com/fazendadosoftware/leanix/tree/main/packages/create-lxr#readme",
   "dependencies": {
-    "chalk": "^5.0.1",
-    "kolorist": "^1.5.1",
-    "minimist": "^1.2.6",
+    "cross-spawn": "^7.0.3",
+    "kolorist": "^1.6.0",
+    "minimist": "^1.2.7",
     "prompts": "^2.4.2",
-    "yargs": "^17.5.1"
+    "short-uuid": "^4.2.2",
+    "yargs": "^17.6.2"
   },
   "devDependencies": {
+    "@types/cross-spawn": "^6.0.2",
     "@types/fs-extra": "^9.0.13",
     "@types/prompts": "^2.0.14",
-    "@types/yargs": "^17.0.2",
+    "@types/yargs": "^17.0.13",
     "execa": "^6.1.0",
     "fs-extra": "^10.1.0",
     "package-json": "^7.0.0",
     "semver": "^7.3.7",
     "touch": "^3.1.0",
     "tslib": "^2.4.0"
-  },
-  "peerDependencies": {
-    "typescript": "^4.8.4"
   }
 }
