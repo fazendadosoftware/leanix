@@ -2,7 +2,7 @@ import chalk from 'chalk'
 import { readdirSync, writeFileSync } from 'fs'
 import { join, dirname } from 'path'
 import semver from 'semver'
-import { fileURLToPath } from 'url'
+import { pathToFileURL, fileURLToPath } from 'url'
 import packageJson from 'package-json'
 import vitePackageJson from 'vite-plugin-lxr/package.json' assert { type: 'json' }
 
@@ -19,7 +19,7 @@ const FORCE_UPGRADE = true
   const templates = readdirSync(join(__dirname, templateDir))
 
   for (const templateName of templates) {
-    const pkgPath = join(__dirname, templateDir, templateName, 'package.json')
+    const pkgPath = pathToFileURL(join(__dirname, templateDir, templateName, 'package.json')).toString()
     const { default: pkg } = await import(pkgPath, { assert: { type: 'json' } })
     log(`${chalk.blue.bold('TEMPLATE')} ${chalk.bold(templateName)}:`)
     const updates = []
@@ -57,7 +57,7 @@ const FORCE_UPGRADE = true
       pkg.devDependencies['vite-plugin-lxr'] = `^${currentLeanIXVitePluginVersion}`
       updates.push(`➕  Added ${chalk.green.bold('vite-plugin-lxr')} ^${currentLeanIXVitePluginVersion} to ${chalk.bold('devDependencies')}`)
     }
-    if (updates.length > 0) writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
+    if (updates.length > 0) writeFileSync(fileURLToPath(pkgPath), JSON.stringify(pkg, null, 2) + '\n')
 
     const entries = [...updates, ...upgrades]
     if (entries.length > 0) entries.forEach(update => log(update))

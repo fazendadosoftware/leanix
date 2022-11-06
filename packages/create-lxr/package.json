@@ -1,6 +1,6 @@
 {
   "name": "create-lxr",
-  "version": "0.0.32",
+  "version": "0.0.33",
   "license": "MIT",
   "author": "Paulo dos Santos",
   "bin": "dist/index.js",
@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/fazendadosoftware/leanix/tree/main/packages/create-lxr#readme",
   "dependencies": {
+    "chalk": "^5.1.2",
     "cross-spawn": "^7.0.3",
     "kolorist": "^1.6.0",
     "minimist": "^1.2.7",
