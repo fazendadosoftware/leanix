@@ -22,7 +22,7 @@
     "build:vite-plugin": "npm run build -w=vite-plugin-lxr",
     "build:create-lxr": "npm run build -w=create-lxr",
     "build:secondary": "npm run build:vite-plugin & npm run build:create-lxr",
-    "test": "vitest --run",
+    "test": "vitest --run --config ./vitest.config.ts",
     "publish": "npm run clean && npm run build && npm run test && npm publish --access=public --workspaces",
     "prepare": "husky install"
   },

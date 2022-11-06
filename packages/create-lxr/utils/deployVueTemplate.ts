@@ -38,6 +38,7 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
     needsTypeScript = false,
     needsEslint = false,
     needsPrettier = false,
+    needsTailwindCSS = false,
     projectName
   } = result
   const needsCypress = needsE2eTesting === 'cypress'
@@ -57,7 +58,8 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
   // work around the esbuild issue that `import.meta.url` cannot be correctly transpiled
   // when bundling for node and the format is cjs
   // const templateRoot = new URL('./template', import.meta.url).pathname
-  const templateRoot = resolve(__dirname, 'template')
+  // const templateRoot = resolve(__dirname, 'template')
+  const templateRoot = join(__dirname, 'templates', 'vue')
   const render = (templateName: string): void => {
     const templateDir = resolve(templateRoot, templateName)
     renderTemplate(templateDir, root)
@@ -67,11 +69,12 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
   render('base')
   // Add configs.
   if (needsJsx ?? false) render('config/jsx')
+  if (needsTailwindCSS) render('config/tailwindcss')
   if (needsVitest) render('config/vitest')
   if (needsCypress) render('config/cypress')
   if (needsCypressCT) render('config/cypress-ct')
   if (needsPlaywright) render('config/playwright')
-  if (needsTypeScript ?? false) {
+  if (needsTypeScript) {
     render('config/typescript')
     // Render tsconfigs
     render('tsconfig/base')
@@ -84,8 +87,12 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
 
   // Render code template.
   // prettier-ignore
-  const codeTemplate = [needsTypeScript ? 'typescript-' : '', 'default'].join()
+  const codeTemplate = [needsTypeScript ? 'typescript-' : '', 'default'].join('')
   render(`code/${codeTemplate}`)
+
+  // Render entry file (main.js/ts).
+  if (needsTailwindCSS) render('entry/tailwindcss')
+  else render('entry/default')
 
   // Cleanup.
 

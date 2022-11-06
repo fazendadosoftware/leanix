@@ -90,40 +90,6 @@ const FRAMEWORKS: IFramework[] = [
     ]
   },
   {
-    name: 'preact',
-    display: 'Preact',
-    color: magenta,
-    variants: [
-      {
-        name: 'preact',
-        display: 'JavaScript',
-        color: yellow
-      },
-      {
-        name: 'preact-ts',
-        display: 'TypeScript',
-        color: blue
-      }
-    ]
-  },
-  {
-    name: 'svelte',
-    display: 'Svelte',
-    color: red,
-    variants: [
-      {
-        name: 'svelte',
-        display: 'JavaScript',
-        color: yellow
-      },
-      {
-        name: 'svelte-ts',
-        display: 'TypeScript',
-        color: blue
-      }
-    ]
-  },
-  {
     name: 'vanilla',
     display: 'Vanilla',
     color: yellow,
@@ -208,17 +174,17 @@ const getVuePrompts = (): Array<prompts.PromptObject<keyof IVueFrameworkOptions 
       inactive: 'No'
     },
     {
-      name: 'needsJsx',
+      name: 'needsTailwindCSS',
       type: (_, values) => isVueFramework(values) ? 'toggle' : null,
-      message: 'Add JSX Support?',
-      initial: false,
+      message: 'Add Tailwind CSS?',
+      initial: true,
       active: 'Yes',
       inactive: 'No'
     },
     {
-      name: 'needsTailwindCSS',
+      name: 'needsJsx',
       type: (_, values) => isVueFramework(values) ? 'toggle' : null,
-      message: 'Add Tailwind CSS?',
+      message: 'Add JSX Support?',
       initial: false,
       active: 'Yes',
       inactive: 'No'
