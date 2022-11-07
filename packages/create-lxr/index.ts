@@ -41,7 +41,7 @@ export interface IVueFrameworkOptions {
   needsJsx?: boolean
   needsTailwindCSS?: boolean
   needsVitest?: boolean
-  needsE2eTesting?: 'cypress' | 'playwright'
+  needsE2eTesting?: false | 'cypress' | 'playwright'
   needsEslint?: boolean
   needsPrettier?: boolean
 }
@@ -232,7 +232,7 @@ const getVuePrompts = (): Array<prompts.PromptObject<keyof IVueFrameworkOptions 
   ]
 }
 
-async function init (): Promise<void> {
+export const init = async (): Promise<void> => {
   console.log(`\n${banner}\n`)
 
   const argv = minimist(process.argv.slice(2), {
@@ -347,7 +347,7 @@ async function init (): Promise<void> {
 
   const root = join(cwd, targetDir ?? '')
 
-  console.log(`\🚀Scaffolding project in ${root}...`)
+  console.log(`🚀Scaffolding project in ${root}...`)
 
   if (overwrite === true) emptyDir(root)
   else if (!fs.existsSync(root)) fs.mkdirSync(root)
@@ -437,6 +437,10 @@ const pkgFromUserAgent = (userAgent?: string): { name: string, version: string }
   return { name: pkgSpecArr[0], version: pkgSpecArr[1] }
 }
 
+/*
 init().catch((e) => {
   console.error(e)
 })
+*/
+
+export default init

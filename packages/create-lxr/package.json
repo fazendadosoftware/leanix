@@ -38,8 +38,10 @@
   },
   "devDependencies": {
     "@types/cross-spawn": "^6.0.2",
+    "@types/eslint": "^8.4.10",
     "@types/fs-extra": "^9.0.13",
     "@types/gradient-string": "^1.1.2",
+    "@types/minimist": "^1.2.2",
     "@types/prompts": "^2.4.1",
     "execa": "^6.1.0",
     "fs-extra": "^10.1.0",

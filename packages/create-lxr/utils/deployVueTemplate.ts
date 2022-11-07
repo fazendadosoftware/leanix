@@ -1,11 +1,9 @@
-import { join, resolve, basename, relative } from 'node:path'
+import { join, resolve, basename } from 'node:path'
 import { existsSync, unlinkSync, writeFileSync, renameSync, readFileSync } from 'node:fs'
 import { preOrderDirectoryTraverse } from './directoryTraverse'
 import renderTemplate from './renderTemplate'
 import renderEslint from './renderEslint'
 import generateReadme from './generateReadme'
-import { green, bold } from 'kolorist'
-import getCommand from './getCommand'
 
 import { IPromptResult } from '..'
 
