@@ -10,8 +10,8 @@
   ],
   "scripts": {
     "preinstall": "mkdir dist && [[ -f dist/index.js ]] || npx touch dist/index.js",
-    "clean": "rimraf dist \"**/.rollup.cache\"",
-    "build": "npm run clean && rollup -c rollup.config.mjs && chmod -R 777 ./dist/",
+    "clean": "rimraf dist",
+    "build": "npm run clean && npx ts-node -O \"{\\\"module\\\": \\\"commonjs\\\"}\" build.ts && shx cp -r ./templates/ ./dist && chmod -R 777 ./dist/",
     "update:versions": "node scripts/updateVersions.mjs"
   },
   "engines": {

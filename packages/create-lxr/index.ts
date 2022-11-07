@@ -437,10 +437,8 @@ const pkgFromUserAgent = (userAgent?: string): { name: string, version: string }
   return { name: pkgSpecArr[0], version: pkgSpecArr[1] }
 }
 
-/*
 init().catch((e) => {
   console.error(e)
 })
-*/
 
 export default init
