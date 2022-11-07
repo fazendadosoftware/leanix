@@ -1,6 +1,6 @@
 import { join, resolve, basename, relative } from 'node:path'
-import { existsSync, rmdirSync, unlinkSync, mkdirSync, writeFileSync, renameSync, readFileSync } from 'node:fs'
-import { postOrderDirectoryTraverse, preOrderDirectoryTraverse } from './directoryTraverse'
+import { existsSync, unlinkSync, writeFileSync, renameSync, readFileSync } from 'node:fs'
+import { preOrderDirectoryTraverse } from './directoryTraverse'
 import renderTemplate from './renderTemplate'
 import renderEslint from './renderEslint'
 import generateReadme from './generateReadme'
@@ -8,16 +8,6 @@ import { green, bold } from 'kolorist'
 import getCommand from './getCommand'
 
 import { IPromptResult } from '..'
-
-const emptyDir = (dir: string): void => {
-  if (!existsSync(dir)) return
-
-  postOrderDirectoryTraverse(
-    dir,
-    (dir: string) => rmdirSync(dir),
-    (file: string) => unlinkSync(file)
-  )
-}
 
 export interface IDeployVueTemplateParams {
   targetDir: string
@@ -32,7 +22,6 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
   const {
     needsE2eTesting = false,
     needsVitest = false,
-    overwrite = false,
     packageName,
     needsJsx = false,
     needsTypeScript = false,
@@ -45,14 +34,8 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
   const needsCypressCT = needsCypress && !needsVitest
   const needsPlaywright = needsE2eTesting === 'playwright'
 
-  const root = join(process.cwd(), targetDir)
-
-  if (existsSync(root) && (overwrite ?? false)) emptyDir(root)
-  else if (!existsSync(root)) mkdirSync(root)
-
-  console.log(`\nScaffolding project in ${root}...`)
   const pkg = { name: packageName, version: '0.0.0' }
-  writeFileSync(resolve(root, 'package.json'), JSON.stringify(pkg, null, 2))
+  writeFileSync(resolve(targetDir, 'package.json'), JSON.stringify(pkg, null, 2))
 
   // todo:
   // work around the esbuild issue that `import.meta.url` cannot be correctly transpiled
@@ -62,7 +45,7 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
   const templateRoot = join(__dirname, 'templates', 'vue')
   const render = (templateName: string): void => {
     const templateDir = resolve(templateRoot, templateName)
-    renderTemplate(templateDir, root)
+    renderTemplate(templateDir, targetDir)
   }
 
   // Render base template
@@ -83,7 +66,7 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
     if (needsVitest ?? false) render('tsconfig/vitest')
   }
   // Render ESLint config
-  if (needsEslint) renderEslint(root, { needsTypeScript, needsCypress, needsCypressCT, needsPrettier })
+  if (needsEslint) renderEslint(targetDir, { needsTypeScript, needsCypress, needsCypressCT, needsPrettier })
 
   // Render code template.
   // prettier-ignore
@@ -110,7 +93,7 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
     // Remove `jsconfig.json`, because we already have tsconfig.json
     // `jsconfig.json` is not reused, because we use solution-style `tsconfig`s, which are much more complicated.
     preOrderDirectoryTraverse(
-      root,
+      targetDir,
       () => {},
       (filepath: string) => {
         if (filepath.endsWith('.js')) {
@@ -122,13 +105,13 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
     )
 
     // Rename entry in `index.html`
-    const indexHtmlPath = resolve(root, 'index.html')
+    const indexHtmlPath = resolve(targetDir, 'index.html')
     const indexHtmlContent = readFileSync(indexHtmlPath, 'utf8')
     writeFileSync(indexHtmlPath, indexHtmlContent.replace('src/main.js', 'src/main.ts'))
   } else {
     // Remove all the remaining `.ts` files
     preOrderDirectoryTraverse(
-      root,
+      targetDir,
       () => {},
       (filepath: string) => {
         if (filepath.endsWith('.ts')) unlinkSync(filepath)
@@ -143,7 +126,7 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
 
   // README generation
   writeFileSync(
-    resolve(root, 'README.md'),
+    resolve(targetDir, 'README.md'),
     generateReadme({
       projectName: projectName ?? packageName ?? defaultProjectName,
       packageManager,
@@ -155,15 +138,4 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
       needsEslint
     })
   )
-
-  console.log('\nDone. Now run:\n')
-  if (root !== process.cwd()) {
-    console.log(`  ${bold(green(`cd ${relative(process.cwd(), root)}`))}`)
-  }
-  console.log(`  ${bold(green(getCommand(packageManager, 'install')))}`)
-  if (needsPrettier) {
-    console.log(`  ${bold(green(getCommand(packageManager, 'lint')))}`)
-  }
-  console.log(`  ${bold(green(getCommand(packageManager, 'dev')))}`)
-  console.log()
 }

@@ -1,19 +1,17 @@
 #!/usr/bin/env node
 import * as fs from 'node:fs'
-import * as path from 'node:path'
 
 import minimist from 'minimist'
 import prompts from 'prompts'
-import { yellow, green, blue, red, cyan, reset } from 'kolorist'
+import { yellow, green, blue, red, cyan } from 'kolorist'
 
-import { pathToFileURL } from 'url'
 import { join, resolve, relative } from 'path'
-
-import { validateDocument } from 'lxr-core'
 
 import banner from './utils/banner'
 import { postOrderDirectoryTraverse } from './utils/directoryTraverse'
 import { deployVueTemplate } from './utils/deployVueTemplate'
+import { deployTemplate } from './utils/deployTemplate'
+import { generateLeanIXFiles } from './utils/leanix'
 
 export type ColorFunc = (str: string | number) => string
 
@@ -112,52 +110,50 @@ const TEMPLATES = FRAMEWORKS
   .map(({ name, variants }) => Array.isArray(variants) ? variants.map(({ name }) => name) : [name])
   .flat()
 
-const renameFiles: Record<string, string> = {
-  _gitignore: '.gitignore'
-}
-
 const getLeanIXQuestions = (argv: minimist.ParsedArgs): Array<prompts.PromptObject<keyof ILeanIXOptions | 'behindProxy'>> => ([
   {
     type: argv?.reportId === undefined ? 'text' : null,
     name: 'reportId',
-    message: reset('Unique id for this report in Java package notation (e.g. net.leanix.barcharts)')
+    message: 'Unique id for this report in Java package notation (e.g. net.leanix.barcharts)'
   },
   {
     type: argv?.author === undefined ? 'text' : null,
     name: 'author',
-    message: reset('Who is the author of this report (e.g. LeanIX GmbH)')
+    message: 'Who is the author of this report (e.g. LeanIX GmbH)'
   },
   {
     type: argv?.title === undefined ? 'text' : null,
     name: 'title',
-    message: reset('A title to be shown in LeanIX when report is installed')
+    message: 'A title to be shown in LeanIX when report is installed'
   },
   {
     type: argv?.description === undefined ? 'text' : null,
     name: 'description',
-    message: reset('Description of your project')
+    message: 'Description of your project'
   },
   {
     type: argv?.host === undefined ? 'text' : null,
     name: 'host',
     initial: 'app.leanix.net',
-    message: reset('Which host do you want to work with?')
+    message: 'Which host do you want to work with?'
   },
   {
     type: argv?.apitoken === undefined ? 'text' : null,
     name: 'apitoken',
-    message: reset('API-Token for Authentication (see: https://dev.leanix.net/docs/authentication#section-generate-api-tokens)')
+    message: 'API-Token for Authentication (see: https://dev.leanix.net/docs/authentication#section-generate-api-tokens)'
   },
   {
-    type: argv?.proxyURL === undefined ? 'confirm' : null,
+    type: argv?.proxyURL === undefined ? 'toggle' : null,
     name: 'behindProxy',
-    message: reset('Are you behind a proxy?'),
-    initial: false
+    message: 'Are you behind a proxy?',
+    initial: false,
+    active: 'Yes',
+    inactive: 'No'
   },
   {
     type: (prev: boolean) => prev && 'text',
     name: 'proxyURL',
-    message: reset('Proxy URL?')
+    message: 'Proxy URL?'
   }
 ])
 
@@ -169,7 +165,7 @@ const getVuePrompts = (): Array<prompts.PromptObject<keyof IVueFrameworkOptions 
       name: 'needsTypeScript',
       type: (_, values) => isVueFramework(values) ? 'toggle' : null,
       message: 'Add TypeScript?',
-      initial: false,
+      initial: true,
       active: 'Yes',
       inactive: 'No'
     },
@@ -193,7 +189,7 @@ const getVuePrompts = (): Array<prompts.PromptObject<keyof IVueFrameworkOptions 
       name: 'needsVitest',
       type: (_, values) => isVueFramework(values) ? 'toggle' : null,
       message: 'Add Vitest for Unit Testing?',
-      initial: false,
+      initial: true,
       active: 'Yes',
       inactive: 'No'
     },
@@ -221,7 +217,7 @@ const getVuePrompts = (): Array<prompts.PromptObject<keyof IVueFrameworkOptions 
       name: 'needsEslint',
       type: (_, values) => isVueFramework(values) ? 'toggle' : null,
       message: 'Add ESLint for code quality?',
-      initial: false,
+      initial: true,
       active: 'Yes',
       inactive: 'No'
     },
@@ -229,7 +225,7 @@ const getVuePrompts = (): Array<prompts.PromptObject<keyof IVueFrameworkOptions 
       name: 'needsPrettier',
       type: (_, values) => (isVueFramework(values) && values.needsEslint as boolean) ? 'toggle' : null,
       message: 'Add Prettier for code formatting?',
-      initial: false,
+      initial: true,
       active: 'Yes',
       inactive: 'No'
     }
@@ -251,7 +247,7 @@ async function init (): Promise<void> {
   const defaultProjectName = targetDir ?? 'leanix-custom-report'
 
   const forceOverwrite = (argv.overwrite) ?? false as boolean
-  let template = argv.template
+  const template = argv.template
 
   // leanix-specific answers
   let { reportId, author, title, description, host, apitoken, proxyURL } = argv
@@ -264,7 +260,7 @@ async function init (): Promise<void> {
         {
           type: targetDir !== null ? null : 'text',
           name: 'projectName',
-          message: reset('Project name:'),
+          message: 'Project name:',
           initial: defaultProjectName,
           onState: state => (targetDir = state.value.trim() ?? defaultProjectName)
         },
@@ -286,7 +282,7 @@ async function init (): Promise<void> {
         {
           name: 'packageName',
           type: () => (isValidPackageName(targetDir) ? null : 'text'),
-          message: reset('Package name:'),
+          message: 'Package name:',
           initial: () => toValidPackageName(targetDir),
           validate: dir => isValidPackageName(dir) ?? 'Invalid package.json name'
         },
@@ -295,8 +291,8 @@ async function init (): Promise<void> {
           name: 'framework',
           message:
             typeof template === 'string' && !TEMPLATES.includes(template)
-              ? reset(`"${template}" isn't a valid template. Please choose from below: `)
-              : reset('Select a framework:'),
+              ? `"${template}" isn't a valid template. Please choose from below: `
+              : 'Select a framework:',
           initial: 0,
           choices: FRAMEWORKS.map(framework => {
             const frameworkColor = framework.color
@@ -309,7 +305,7 @@ async function init (): Promise<void> {
         {
           type: (framework: IFramework) => Array.isArray(framework?.variants) ? 'select' : null,
           name: 'variant',
-          message: reset('Select a variant:'),
+          message: 'Select a variant:',
           choices: (framework: IFramework) => (framework?.variants ?? [])
             .map(variant => {
               const variantColor = variant.color
@@ -334,7 +330,7 @@ async function init (): Promise<void> {
   }
 
   // user choice associated with prompts
-  const { framework, overwrite, packageName, variant = null } = result;
+  const { overwrite } = result;
   // leanix-specific answers
   ({
     reportId = reportId,
@@ -346,60 +342,22 @@ async function init (): Promise<void> {
     proxyURL = proxyURL
   } = result)
 
-  if (result?.framework?.name === 'vue') {
-    deployVueTemplate({ defaultProjectName, targetDir, result })
-    process.exit(1)
-  }
+  const pkgInfo = pkgFromUserAgent(process.env.npm_config_user_agent) ?? null
+  const pkgManager = (pkgInfo != null) ? pkgInfo.name : 'npm'
 
   const root = join(cwd, targetDir ?? '')
+
+  console.log(`\🚀Scaffolding project in ${root}...`)
 
   if (overwrite === true) emptyDir(root)
   else if (!fs.existsSync(root)) fs.mkdirSync(root)
 
-  // determine template
-  template = variant ?? framework ?? template
-  if (template === null) throw new Error('unknown template')
+  const deployFn = result?.framework?.name === 'vue' ? deployVueTemplate : deployTemplate
+  deployFn({ defaultProjectName, targetDir: root, result })
 
-  const pkgInfo = pkgFromUserAgent(process.env.npm_config_user_agent) ?? null
-  const pkgManager = (pkgInfo != null) ? pkgInfo.name : 'npm'
+  await generateLeanIXFiles({ targetDir: root, result })
 
-  console.log(`\nScaffolding project in ${root}...`)
-
-  const templateDir = join(__dirname, 'templates', template)
-
-  const write = async (file: string, content?: string): Promise<void> => {
-    const targetPath = join(root, renameFiles[file] ?? file)
-    if (content !== undefined) await fs.writeFileSync(pathToFileURL(targetPath), content)
-    else copy(join(templateDir, file), targetPath)
-  }
-
-  const templateFiles = await fs.readdirSync(pathToFileURL(templateDir))
-  for (const file of templateFiles.filter(f => f !== 'package.json')) {
-    await write(file)
-  }
-
-  let pkg = JSON.parse(fs.readFileSync(path.join(templateDir, 'package.json'), 'utf-8'))
-
-  const pkgMetadataFields = { name: packageName ?? targetDir, author, description, version: pkg.version }
-  const leanixReport = { id: reportId, title, defaultConfig: {} }
-
-  pkg = { ...pkg, ...pkgMetadataFields, leanixReport }
-  await validateDocument({ ...leanixReport, ...pkgMetadataFields }, 'lxreport.json')
-
-  const lxrJson = { host, apitoken, proxyURL }
-
-  await validateDocument(lxrJson, 'lxr.json')
-
-  const generatedFiles: Record<string, object> = {
-    'package.json': pkg,
-    'lxr.json': lxrJson
-  }
-
-  Object.entries(generatedFiles)
-    // eslint-disable-next-line @typescript-eslint/no-misused-promises
-    .forEach(async ([filename, content]) => await write(filename, JSON.stringify(content, null, 2) + '\n'))
-
-  console.log('\nDone. Now run:\n')
+  console.log('\n🔥Done. Now run:\n')
   if (root !== cwd) {
     console.log(`  cd ${relative(cwd, root)}`)
   }
