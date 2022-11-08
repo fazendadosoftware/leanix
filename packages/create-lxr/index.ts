@@ -193,6 +193,7 @@ const getVuePrompts = (): Array<prompts.PromptObject<keyof IVueFrameworkOptions 
       active: 'Yes',
       inactive: 'No'
     },
+    /*
     {
       name: 'needsE2eTesting',
       type: (_, values) => isVueFramework(values) ? 'select' : null,
@@ -213,6 +214,7 @@ const getVuePrompts = (): Array<prompts.PromptObject<keyof IVueFrameworkOptions 
         }
       ]
     },
+    */
     {
       name: 'needsEslint',
       type: (_, values) => isVueFramework(values) ? 'toggle' : null,

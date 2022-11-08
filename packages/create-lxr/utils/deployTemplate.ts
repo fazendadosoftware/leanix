@@ -30,7 +30,8 @@ const copy = (src: string, dest: string): void => {
 }
 
 export const deployTemplate = (params: IDeployTemplateParams): void => {
-  const { variant, framework, targetDir = null } = params.result
+  const { targetDir, result } = params
+  const { variant, framework } = result
   if (targetDir === null) throw Error('invalid target dir')
   // determine template
   const template = variant ?? framework?.name ?? null
@@ -45,7 +46,7 @@ export const deployTemplate = (params: IDeployTemplateParams): void => {
   }
 
   const templateFiles = readdirSync(pathToFileURL(templateDir))
-  for (const file of templateFiles.filter(f => f !== 'package.json')) {
+  for (const file of templateFiles /* .filter(f => f !== 'package.json') */) {
     write(file)
   }
 }
