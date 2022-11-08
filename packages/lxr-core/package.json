@@ -2,9 +2,9 @@
   "name": "lxr-core",
   "private": true,
   "description": "Library with core functionality for interfacing with LeanIX Custom Report API",
-  "main": "dist/index.js",
-  "module": "dist/esm/index.js",
-  "types": "dist/types/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "dist/esm/index.mjs",
+  "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
@@ -12,7 +12,7 @@
   "keywords": [],
   "scripts": {
     "test": "vitest --run",
-    "build": "npm run generateSchema && rollup -c rollup.config.mjs",
+    "build": "npm run generateSchema && npx ts-node -O \"{\\\"module\\\": \\\"commonjs\\\"}\" build.ts && tsc --emitDeclarationOnly",
     "generateSchema": "npm run generateSchema:credentials && npm run generateSchema:metadata && npm run generateSchema:pkgJson",
     "generateSchema:credentials": "npx typescript-json-schema tsconfig.json LeanIXCredentials --id /LeanIXCredentials --titles --required --noExtraProps --out lib/schema/LeanIXCredentials.json",
     "generateSchema:metadata": "npx typescript-json-schema tsconfig.json CustomReportMetadata --id /CustomReportMetadata --titles --required --noExtraProps --out lib/schema/CustomReportMetadata.json",
