@@ -1,4 +1,4 @@
-import chalk from 'chalk'
+import kleur from 'kleur'
 import { readdirSync, writeFileSync } from 'fs'
 import { join, dirname } from 'path'
 import semver from 'semver'
@@ -21,7 +21,7 @@ const FORCE_UPGRADE = true
   for (const templateName of templates) {
     const pkgPath = pathToFileURL(join(__dirname, templateDir, templateName, 'package.json')).toString()
     const { default: pkg } = await import(pkgPath, { assert: { type: 'json' } })
-    log(`${chalk.blue.bold('TEMPLATE')} ${chalk.bold(templateName)}:`)
+    log(`${kleur.blue.bold('TEMPLATE')} ${kleur.bold(templateName)}:`)
     const updates = []
     const upgrades = []
 
@@ -42,20 +42,20 @@ const FORCE_UPGRADE = true
 
         if (semver.gt(wanted, semver.minVersion(requiredRange))) {
           pkg[key][dependency] = `^${wanted}`
-          updates.push(`✔️  ${chalk.green.bold(dependency)}: ${requiredRange} to ^${wanted}`)
+          updates.push(`✔️  ${kleur.green.bold(dependency)}: ${requiredRange} to ^${wanted}`)
         }
         if (semver.gtr(gtVersion, requiredRange)) {
-          if (!FORCE_UPGRADE) upgrades.push(`⚠️  upgrade-available for ${chalk.redBright.bold(dependency)}: ${requiredRange} to ^${gtVersion}`)
+          if (!FORCE_UPGRADE) upgrades.push(`⚠️  upgrade-available for ${kleur.redBright.bold(dependency)}: ${requiredRange} to ^${gtVersion}`)
           else {
             pkg[key][dependency] = `^${gtVersion}`
-            upgrades.push(`⚠️  upgraded (may have breaking changes...) ${chalk.redBright.bold(dependency)}: ${requiredRange} to ^${gtVersion}`)
+            upgrades.push(`⚠️  upgraded (may have breaking changes...) ${kleur.redBright.bold(dependency)}: ${requiredRange} to ^${gtVersion}`)
           }
         }
       }
     }
     if (pkg.devDependencies['vite-plugin-lxr'] !== `^${currentLeanIXVitePluginVersion}`) {
       pkg.devDependencies['vite-plugin-lxr'] = `^${currentLeanIXVitePluginVersion}`
-      updates.push(`➕  Added ${chalk.green.bold('vite-plugin-lxr')} ^${currentLeanIXVitePluginVersion} to ${chalk.bold('devDependencies')}`)
+      updates.push(`➕  Added ${kleur.green.bold('vite-plugin-lxr')} ^${currentLeanIXVitePluginVersion} to ${kleur.bold('devDependencies')}`)
     }
     if (updates.length > 0) writeFileSync(fileURLToPath(pkgPath), JSON.stringify(pkg, null, 2) + '\n')
 

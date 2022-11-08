@@ -8,8 +8,8 @@
   },
   "devDependencies": {
     "typescript": "^4.8.4",
-    "vite": "^3.2.2",
-    "vite-plugin-lxr": "^0.0.7"
+    "vite": "^3.2.3",
+    "vite-plugin-lxr": "^0.0.8"
   },
   "dependencies": {
     "@leanix/reporting": "^0.4.120"
