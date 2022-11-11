@@ -20,7 +20,11 @@ export default function renderEslint (
   rootDir: string,
   params?: IRenderEslintParams
 ): void {
-  const additionalConfig: Linter.Config = {}
+  const additionalConfig: Linter.Config = {
+    globals: {
+      lx: true
+    }
+  }
   const additionalDependencies: Record<string, any> = {}
 
   if ((params?.needsCypress) ?? false) {
