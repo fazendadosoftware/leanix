@@ -8,7 +8,7 @@ const path = require('path')
 const fs = require('fs')
 const args = require('minimist')(process.argv.slice(2))
 const semver = require('semver')
-const chalk = require('chalk')
+const kleur = require('kleur')
 const prompts = require('prompts')
 
 const pkgDir = process.cwd()
@@ -60,14 +60,14 @@ const run = (bin, args, opts = {}) =>
  * @param {object} opts
  */
 const dryRun = (bin, args, opts = {}) =>
-  console.log(chalk.blue(`[dryrun] ${bin} ${args.join(' ')}`), opts)
+  console.log(kleur.blue(`[dryrun] ${bin} ${args.join(' ')}`), opts)
 
 const runIfNotDry = isDryRun ? dryRun : run
 
 /**
  * @param {string} msg
  */
-const step = (msg) => console.log(chalk.cyan(msg))
+const step = (msg) => console.log(kleur.cyan(msg))
 
 async function main () {
   let targetVersion = args._[0]
@@ -202,10 +202,10 @@ async function publishPackage (version, runIfNotDry) {
     await runIfNotDry('yarn', publicArgs, {
       stdio: 'pipe'
     })
-    console.log(chalk.green(`Successfully published ${pkgName}@${version}`))
+    console.log(kleur.green(`Successfully published ${pkgName}@${version}`))
   } catch (e) {
     if (e.stderr.match(/previously published/)) {
-      console.log(chalk.red(`Skipping already published: ${pkgName}`))
+      console.log(kleur.red(`Skipping already published: ${pkgName}`))
     } else {
       throw e
     }

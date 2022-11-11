@@ -3,7 +3,8 @@
   "compilerOptions": {
     "rootDir": "lib",
     "outDir": "dist",
-    "declarationDir": "dist/types"
+    "incremental": true,
+    "composite": true
   },
   "include": ["lib"],
   "exclude": ["**/*.spec.ts"],
