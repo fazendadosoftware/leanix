@@ -1,0 +1,3 @@
+.btn {
+  @apply bg-gray-200 hover:bg-gray-300 transition-colors text-xs shadow rounded px-1 py-0.5;
+}
