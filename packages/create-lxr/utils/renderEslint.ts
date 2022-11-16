@@ -25,6 +25,18 @@ export default function renderEslint (
       lx: true
     }
   }
+  // https://stackoverflow.com/questions/67437478/why-eslint-dont-see-global-typescript-types-in-vue-files-no-undef
+  if (params?.needsTypeScript === true) {
+    additionalConfig.overrides = [
+      {
+        files: ['*.ts', '*.tsx', '*.vue'],
+        rules: {
+          'no-undef': 'off'
+        }
+      }
+    ]
+  }
+
   const additionalDependencies: Record<string, any> = {}
 
   if ((params?.needsCypress) ?? false) {
