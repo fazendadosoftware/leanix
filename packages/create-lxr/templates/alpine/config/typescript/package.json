@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "build": "tsc && vite build --mode development",
+    "build-only": "tsc && vite build"
+  },
+  "devDependencies": {
+    "@types/alpinejs": "^3.7.1",
+    "typescript": "^4.8.4"
+  }
+}

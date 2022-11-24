@@ -2,35 +2,26 @@ import { join, resolve, basename } from 'node:path'
 import { existsSync, unlinkSync, writeFileSync, renameSync, readFileSync } from 'node:fs'
 import { preOrderDirectoryTraverse } from './directoryTraverse'
 import renderTemplate from './renderTemplate'
-import renderEslint from './renderEslint'
-import generateReadme from './generateReadme'
+import generateReadme from './generateReadmeAlpineJS'
 
-import { IPromptVueResult } from '..'
+import { IPromptAlpineResult } from '..'
 
-export interface IDeployVueTemplateParams {
+export interface IDeployAlpineTemplateParams {
   targetDir: string
   defaultProjectName: string
-  result: IPromptVueResult
+  result: IPromptAlpineResult
 }
 
-export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
+export const deployAlpineTemplate = (params: IDeployAlpineTemplateParams): void => {
   const { targetDir, defaultProjectName, result } = params
   // `initial` won't take effect if the prompt type is null
   // so we still have to assign the default values here
   const {
-    needsE2eTesting = false,
-    needsVitest = false,
     packageName,
-    needsJsx = false,
     needsTypeScript = false,
-    needsEslint = false,
-    needsPrettier = false,
     needsTailwindCSS = false,
     projectName
   } = result
-  const needsCypress = needsE2eTesting === 'cypress'
-  const needsCypressCT = needsCypress && !needsVitest
-  const needsPlaywright = needsE2eTesting === 'playwright'
 
   const pkg = { name: packageName, version: '0.0.0' }
   writeFileSync(resolve(targetDir, 'package.json'), JSON.stringify(pkg, null, 2))
@@ -40,7 +31,7 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
   // when bundling for node and the format is cjs
   // const templateRoot = new URL('./template', import.meta.url).pathname
   // const templateRoot = resolve(__dirname, 'template')
-  const templateRoot = join(__dirname, 'templates', 'vue')
+  const templateRoot = join(__dirname, 'templates', 'alpine')
   const render = (templateName: string): void => {
     const templateDir = resolve(templateRoot, templateName)
     renderTemplate(templateDir, targetDir)
@@ -49,31 +40,11 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
   // Render base template
   render('base')
   // Add configs.
-  if (needsJsx ?? false) render('config/jsx')
   if (needsTailwindCSS) render('config/tailwindcss')
-  if (needsVitest) render('config/vitest')
-  if (needsCypress) render('config/cypress')
-  if (needsCypressCT) render('config/cypress-ct')
-  if (needsPlaywright) render('config/playwright')
-  if (needsTypeScript) {
-    render('config/typescript')
-    // Render tsconfigs
-    render('tsconfig/base')
-    if (needsCypress) render('tsconfig/cypress')
-    if (needsCypressCT) render('tsconfig/cypress-ct')
-    if (needsVitest ?? false) render('tsconfig/vitest')
-  }
-  // Render ESLint config
-  if (needsEslint) renderEslint(targetDir, { needsTypeScript, needsCypress, needsCypressCT, needsPrettier })
-
-  // Render code template.
-  // prettier-ignore
-  const codeTemplate = [needsTypeScript ? 'typescript-' : '', 'default'].join('')
-  render(`code/${codeTemplate}`)
+  if (needsTypeScript) render('config/typescript')
 
   // Render entry file (main.js/ts).
-  if (needsTailwindCSS) render('entry/tailwindcss')
-  else render('entry/default')
+  render(`entry/${needsTypeScript ? 'typescript' : 'default'}${needsTailwindCSS ? '-tailwindcss' : ''}`)
 
   // Cleanup.
 
@@ -128,12 +99,7 @@ export const deployVueTemplate = (params: IDeployVueTemplateParams): void => {
     generateReadme({
       projectName: projectName ?? packageName ?? defaultProjectName,
       packageManager,
-      needsTypeScript,
-      needsVitest,
-      needsCypress,
-      needsPlaywright,
-      needsCypressCT,
-      needsEslint
+      needsTypeScript
     })
   )
 }

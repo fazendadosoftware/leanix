@@ -3,13 +3,14 @@ import * as fs from 'node:fs'
 
 import minimist from 'minimist'
 import prompts from 'prompts'
-import { yellow, green, blue, red, cyan } from 'kolorist'
+import { yellow, green, blue, red, cyan, magenta } from 'kolorist'
 
 import { join, resolve, relative } from 'path'
 
 import banner from './utils/banner'
 import { postOrderDirectoryTraverse } from './utils/directoryTraverse'
 import { deployVueTemplate } from './utils/deployVueTemplate'
+import { deployAlpineTemplate } from './utils/deployAlpineTemplate'
 import { deployTemplate } from './utils/deployTemplate'
 import { generateLeanIXFiles } from './utils/leanix'
 
@@ -46,6 +47,11 @@ export interface IVueFrameworkOptions {
   needsPrettier?: boolean
 }
 
+export interface IAlpineFrameworkOptions {
+  needsTypeScript?: boolean
+  needsTailwindCSS?: boolean
+}
+
 export interface ILeanIXOptions {
   reportId?: string
   author?: string
@@ -56,10 +62,15 @@ export interface ILeanIXOptions {
   proxyURL?: string
 }
 
-export interface IPromptResult extends IProjectOptions, IVueFrameworkOptions, ILeanIXOptions {
+export interface IPromptResult extends IProjectOptions, ILeanIXOptions {
   projectName?: string
   framework?: IFramework
   variant?: string
+}
+export interface IPromptVueResult extends IPromptResult, IVueFrameworkOptions {
+}
+
+export interface IPromptAlpineResult extends IPromptResult, IAlpineFrameworkOptions {
 }
 
 const cwd = process.cwd()
@@ -86,6 +97,11 @@ const FRAMEWORKS: IFramework[] = [
         color: blue
       }
     ]
+  },
+  {
+    name: 'alpine',
+    display: 'Alpine',
+    color: magenta
   },
   {
     name: 'vanilla',
@@ -158,6 +174,7 @@ const getLeanIXQuestions = (argv: minimist.ParsedArgs): Array<prompts.PromptObje
 ])
 
 const isVueFramework = (values: prompts.Answers<'framework'>): boolean => values?.framework?.name === 'vue'
+const isAlpineFramework = (values: prompts.Answers<'framework'>): boolean => values?.framework?.name === 'alpine'
 
 const getVuePrompts = (): Array<prompts.PromptObject<keyof IVueFrameworkOptions | 'framework'>> => {
   return [
@@ -234,6 +251,27 @@ const getVuePrompts = (): Array<prompts.PromptObject<keyof IVueFrameworkOptions 
   ]
 }
 
+const getAlpinePrompts = (): Array<prompts.PromptObject<keyof IAlpineFrameworkOptions | 'framework'>> => {
+  return [
+    {
+      name: 'needsTypeScript',
+      type: (_, values) => isAlpineFramework(values) ? 'toggle' : null,
+      message: 'Add TypeScript?',
+      initial: true,
+      active: 'Yes',
+      inactive: 'No'
+    },
+    {
+      name: 'needsTailwindCSS',
+      type: (_, values) => isAlpineFramework(values) ? 'toggle' : null,
+      message: 'Add Tailwind CSS?',
+      initial: true,
+      active: 'Yes',
+      inactive: 'No'
+    }
+  ]
+}
+
 export const init = async (): Promise<void> => {
   console.log(`\n${banner}\n`)
 
@@ -255,7 +293,6 @@ export const init = async (): Promise<void> => {
   let { reportId, author, title, description, host, apitoken, proxyURL } = argv
 
   let result: IPromptResult = {}
-
   try {
     result = await prompts(
       [
@@ -318,6 +355,7 @@ export const init = async (): Promise<void> => {
             })
         },
         ...getVuePrompts(),
+        ...getAlpinePrompts(),
         ...getLeanIXQuestions(argv)
       ],
       {
@@ -354,7 +392,20 @@ export const init = async (): Promise<void> => {
   if (overwrite === true) emptyDir(root)
   else if (!fs.existsSync(root)) fs.mkdirSync(root)
 
-  const deployFn = result?.framework?.name === 'vue' ? deployVueTemplate : deployTemplate
+  let deployFn = null
+  switch (result?.framework?.name) {
+    case 'vue':
+      deployFn = deployVueTemplate
+      break
+    case 'alpine':
+      deployFn = deployAlpineTemplate
+      break
+    default:
+      deployFn = deployTemplate
+      break
+  }
+  if (deployFn === null) throw new Error('invalid deploy function')
+  // const deployFn = result?.framework?.name === 'vue' ? deployVueTemplate : deployTemplate
   deployFn({ defaultProjectName, targetDir: root, result })
 
   await generateLeanIXFiles({ targetDir: root, result })
