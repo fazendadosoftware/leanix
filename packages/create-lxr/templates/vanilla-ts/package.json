@@ -3,15 +3,15 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build --mode development",
-    "upload": "tsc && vite build"
+    "build": "tsc && vite build",
+    "upload": "tsc && vite build --mode upload"
   },
   "devDependencies": {
-    "typescript": "^4.8.4",
-    "vite": "^3.2.3",
-    "vite-plugin-lxr": "^0.0.8"
+    "typescript": "^5.0.0",
+    "vite": "^4.0.0",
+    "vite-plugin-lxr": "^4.0.0"
   },
   "dependencies": {
-    "@leanix/reporting": "^0.4.120"
+    "@leanix/reporting": "^0.4.126"
   }
 }

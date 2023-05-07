@@ -4,6 +4,8 @@ import { join, dirname } from 'path'
 import semver from 'semver'
 import { pathToFileURL, fileURLToPath } from 'url'
 import packageJson from 'package-json'
+import { readFileSync } from "fs"
+// https://github.com/eslint/eslint/discussions/15305
 import vitePackageJson from 'vite-plugin-lxr/package.json' assert { type: 'json' }
 
 const __filename = fileURLToPath(import.meta.url)

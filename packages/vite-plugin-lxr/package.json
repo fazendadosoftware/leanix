@@ -1,6 +1,6 @@
 {
   "name": "vite-plugin-lxr",
-  "version": "1.0.0",
+  "version": "4.0.1",
   "description": "A Vite plugin for developing LeanIX Custom Reports",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -17,7 +17,7 @@
     "build": "npx ts-node -O \"{\\\"module\\\": \\\"commonjs\\\"}\" build.ts && tsc --emitDeclarationOnly"
   },
   "peerDependencies": {
-    "vite": "^3.2.3"
+    "vite": "^4.0.0"
   },
   "devDependencies": {
     "@types/node-forge": "^1.0.4"

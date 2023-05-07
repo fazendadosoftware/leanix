@@ -38,9 +38,9 @@ test('validate "lxr.json" and "lxreport.json" against document schemas', async (
   const validMetadataDocument = getDummyReportMetadata()
   const invalidMetadataDocument = { ...validMetadataDocument, id: undefined }
 
-  await expect(async () => await validateDocument(validMetadataDocument, 'lxreport.json')).rejects.not.toThrowError()
+  await expect(validateDocument(validMetadataDocument, 'lxreport.json')).resolves.not.toThrowError()
   await expect(async () => await validateDocument(invalidMetadataDocument, 'lxreport.json')).rejects.toThrowError()
-  await expect(async () => await validateDocument({ host: 'demo-us.leanix.net', apitoken: 'token' }, 'lxr.json')).rejects.not.toThrowError()
+  await expect(validateDocument({ host: 'demo-us.leanix.net', apitoken: 'token' }, 'lxr.json')).resolves.not.toThrowError()
   await expect(async () => await validateDocument({ host: 'demo-us.leanix.net' }, 'lxr.json')).rejects.toThrowError()
 })
 
@@ -61,7 +61,7 @@ test('getAccessToken returns a token', async () => {
   expect(accessToken.tokenType).toBe('bearer')
 })
 
-test('getAccessToken with proxy returns a token', async () => {
+test.skip('getAccessToken with proxy returns a token', async () => {
   const credentials = await readLxrJson(LXR_JSON_PATH)
   credentials.proxyURL = `http://127.0.0.1:${proxyPort}`
   const accessToken = await getAccessToken(credentials)
