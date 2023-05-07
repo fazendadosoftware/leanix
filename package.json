@@ -9,12 +9,10 @@
   },
   "author": {
     "name": "Paulo dos Santos",
-    "email": "paulo@fazendadosoftware.com"
+    "email": "paulo.santos@leanix.net"
   },
   "license": "MIT",
   "scripts": {
-    "lint": "eslint packages/*",
-    "fix": "eslint packages/* --fix",
     "clean:all": "npm run clean & rimraf \"**/node_modules\"",
     "clean": "rimraf \"packages/**/dist\" \"**/*.tsbuildinfo\" \"**/*.tgz\" \"**/.temp\"",
     "build": "npm run build:core && npm run build:secondary",
@@ -27,16 +25,9 @@
     "prepare": "husky install"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.42.1",
     "esbuild": "^0.15.13",
-    "eslint": "^8.0.1",
-    "eslint-config-standard-with-typescript": "^23.0.0",
-    "eslint-define-config": "^1.0.9",
-    "eslint-plugin-import": "^2.25.2",
-    "eslint-plugin-n": "^15.0.0",
-    "eslint-plugin-promise": "^6.0.0",
     "husky": "^8.0.1",
+    "lerna": "^6.5.1",
     "shx": "^0.3.4",
     "typescript": "^4.8.4",
     "vite": "^3.2.2",
@@ -48,5 +39,10 @@
     "minimist": "^1.2.7",
     "prompts": "^2.4.2",
     "semver": "^7.3.8"
+  },
+  "eslintConfig": {
+    "extends": [
+      "eslint-config-lx"
+    ]
   }
 }

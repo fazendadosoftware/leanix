@@ -1,7 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { validateDocument } from 'lxr-core'
-import { IPromptResult } from '..'
+import { type IPromptResult } from '..'
 import { pathToFileURL } from 'node:url'
 
 export interface IAddLeanIXMetadataToPackageJson {

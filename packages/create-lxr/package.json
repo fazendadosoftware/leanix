@@ -32,7 +32,8 @@
     "kolorist": "^1.6.0",
     "minimist": "^1.2.7",
     "prompts": "^2.4.2",
-    "short-uuid": "^4.2.2"
+    "short-uuid": "^4.2.2",
+    "lxr-core": "*"
   },
   "devDependencies": {
     "@types/eslint": "^8.4.10",

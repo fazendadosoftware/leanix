@@ -1,9 +1,11 @@
 {
   "compilerOptions": {
+    "rootDir": "../../",
     "target": "es2019",
     "module": "ESNext",
     "declaration": true,
     "sourceMap": true,
+    "incremental": true,
     "composite": true,
     "strict": true,
     "moduleResolution": "Node",
@@ -12,8 +14,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
+  "include": ["../../**/*.ts"],
   "exclude": [".git", "node_modules"],
-  "references": [
-    { "path": "./packages/lxr-core"}
-  ]
 }

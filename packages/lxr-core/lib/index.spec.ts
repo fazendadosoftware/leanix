@@ -3,9 +3,9 @@ import appRoot from 'app-root-path'
 import { URL } from 'url'
 import { resolve } from 'path'
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'fs'
-import { ReadEntry, t as tarT } from 'tar'
+import { type ReadEntry, t as tarT } from 'tar'
 import ProxyServer from 'transparent-proxy'
-import { validateDocument, readLxrJson, getAccessToken, getLaunchUrl, createBundle, CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, uploadBundle } from './index'
+import { validateDocument, readLxrJson, getAccessToken, getLaunchUrl, createBundle, type CustomReportMetadata, fetchWorkspaceReports, deleteWorkspaceReportById, uploadBundle } from './index'
 
 const LXR_JSON_PATH = resolve(appRoot.path, 'lxr.json')
 
@@ -38,9 +38,9 @@ test('validate "lxr.json" and "lxreport.json" against document schemas', async (
   const validMetadataDocument = getDummyReportMetadata()
   const invalidMetadataDocument = { ...validMetadataDocument, id: undefined }
 
-  await expect(async () => await validateDocument(validMetadataDocument, 'lxreport.json')).not.toThrowError()
+  await expect(async () => await validateDocument(validMetadataDocument, 'lxreport.json')).rejects.not.toThrowError()
   await expect(async () => await validateDocument(invalidMetadataDocument, 'lxreport.json')).rejects.toThrowError()
-  await expect(async () => await validateDocument({ host: 'demo-us.leanix.net', apitoken: 'token' }, 'lxr.json')).not.toThrowError()
+  await expect(async () => await validateDocument({ host: 'demo-us.leanix.net', apitoken: 'token' }, 'lxr.json')).rejects.not.toThrowError()
   await expect(async () => await validateDocument({ host: 'demo-us.leanix.net' }, 'lxr.json')).rejects.toThrowError()
 })
 
@@ -101,7 +101,7 @@ test('createProjectBundle returns a readable stream', async () => {
   }
 
   Object.entries(projectFiles)
-    .forEach(([filename, content]) => writeFileSync(resolve(outDir, filename), content))
+    .forEach(([filename, content]) => { writeFileSync(resolve(outDir, filename), content) })
 
   const expectedMetadata = getDummyReportMetadata()
 
@@ -110,8 +110,8 @@ test('createProjectBundle returns a readable stream', async () => {
   const bundleFiles = await new Promise<Set<string>>((resolve, reject) => {
     const entries: ReadEntry[] = []
     fileStream.on('open', () => fileStream.pipe(tarT()).on('entry', entry => entries.push(entry)))
-    fileStream.on('error', err => reject(err))
-    fileStream.on('end', () => resolve(new Set(entries.map(({ path }) => path))))
+    fileStream.on('error', err => { reject(err) })
+    fileStream.on('end', () => { resolve(new Set(entries.map(({ path }) => path))) })
   })
 
   const requiredFiles = new Set([...Object.keys(projectFiles), 'lxreport.json'])

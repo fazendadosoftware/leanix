@@ -1,4 +1,4 @@
-import { build, BuildOptions } from 'esbuild'
+import { build, type BuildOptions } from 'esbuild'
 
 const options: BuildOptions = {
   entryPoints: ['index.ts'],
