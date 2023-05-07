@@ -3,8 +3,8 @@
     "test:unit": "vitest --environment jsdom --root src/"
   },
   "devDependencies": {
-    "@vue/test-utils": "^2.2.1",
-    "jsdom": "^20.0.2",
-    "vitest": "^0.25.0"
+    "@vue/test-utils": "^2.3.2",
+    "jsdom": "^22.0.0",
+    "vitest": "^0.31.0"
   }
 }

@@ -1,5 +1,5 @@
-import { Plugin, Logger, ResolvedConfig } from 'vite'
-import { AddressInfo } from 'net'
+import { type Plugin, type Logger, type ResolvedConfig } from 'vite'
+import { type AddressInfo } from 'net'
 import { join } from 'path'
 import { promises as fsp } from 'node:fs'
 import { resolveHostname } from './helpers'
@@ -11,12 +11,12 @@ import {
   getLaunchUrl,
   createBundle,
   uploadBundle,
-  CustomReportMetadata,
-  AccessToken,
-  LeanIXCredentials,
-  ValidationError,
-  CustomReportProjectBundle,
-  JwtClaims
+  type CustomReportMetadata,
+  type AccessToken,
+  type LeanIXCredentials,
+  type ValidationError,
+  type CustomReportProjectBundle,
+  type JwtClaims
 } from 'lxr-core'
 
 interface LeanIXPlugin extends Plugin {
@@ -48,7 +48,7 @@ export async function getCertificate (cacheDir: string): Promise<any> {
     const content = (await import('./certificate')).createCertificate()
     fsp
       .mkdir(cacheDir, { recursive: true })
-      .then(async () => await fsp.writeFile(cachePath, content))
+      .then(async () => { await fsp.writeFile(cachePath, content) })
       .catch(() => {})
     return content
   }
@@ -58,7 +58,8 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
   let logger: Logger
   let accessToken: AccessToken | null = null
   let claims: JwtClaims | null = null
-  let isProduction: boolean = false
+  let shouldUpload: boolean = false
+  let loadWorkspaceCredentials: boolean = false
   let credentials: LeanIXCredentials = { host: '', apitoken: '' }
   let viteDevServerUrl: string
   let launchUrl: string
@@ -71,27 +72,34 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
     devServerUrl: null,
     launchUrl: null,
     async config (config, env) {
-      try {
-        credentials = await readLxrJson()
-      } catch (error) {
-        logger = logger ?? console
-        logger?.error(error as string)
-        process.exit(1)
-      }
-      const certificate = await getCertificate((config.cacheDir ?? defaultCacheDir) + '/basic-ssl')
-      const https = (): any => ({ cert: certificate, key: certificate })
+      shouldUpload = env.mode === 'upload'
+      loadWorkspaceCredentials = env.command === 'serve' || shouldUpload
+      if (loadWorkspaceCredentials) {
+        const certificate = await getCertificate((config.cacheDir ?? defaultCacheDir) + '/basic-ssl')
+        const https = (): any => ({ cert: certificate, key: certificate })
 
-      // server exposes host and runs in TLS + HTTPS2 mode
-      // required for serving the custom report files in LeanIX
-      config.base = ''
-      config.server = { ...config.server ?? {}, https: https(), host: true }
-      config.preview = { ...config.preview ?? {}, https: https() }
-      if (credentials.proxyURL !== undefined) config.server.proxy = { '*': credentials.proxyURL }
+        // server exposes host and runs in TLS + HTTPS2 mode
+        // required for serving the custom report files in LeanIX
+        config.base = ''
+        config.server = { ...config.server ?? {}, https: https(), host: true }
+        config.preview = { ...config.preview ?? {}, https: https() }
+        if (credentials.proxyURL !== undefined) config.server.proxy = { '*': credentials.proxyURL }
+        try {
+          credentials = await readLxrJson()
+        } catch (error) {
+          logger = logger ?? console
+          const code = (error as { code: string })?.code ?? null
+          if (code === 'ENOENT') {
+            logger.error('💥 Error: "lxr.json" file not found in your project root')
+          } else logger?.error(error as string)
+
+          process.exit(1)
+        }
+      }
     },
     async configResolved (resolvedConfig: ResolvedConfig) {
-      isProduction = resolvedConfig.isProduction
       logger = resolvedConfig.logger
-      if (resolvedConfig.command === 'serve' || resolvedConfig.isProduction) {
+      if (loadWorkspaceCredentials) {
         try {
           if (typeof credentials.proxyURL === 'string') {
             logger?.info(`👀 vite-plugin is using the following proxy: ${credentials.proxyURL}`)
@@ -154,7 +162,7 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
         logger?.error('💥 Error while create project bundle file.')
         process.exit(1)
       }
-      if (bundle !== undefined && accessToken?.accessToken !== undefined && isProduction) {
+      if (bundle !== undefined && accessToken?.accessToken !== undefined && shouldUpload) {
         try {
           const result = await uploadBundle(bundle, accessToken.accessToken, credentials.proxyURL)
           if (result.status === 'ERROR') {
@@ -170,8 +178,6 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
           logger?.error(`💣 ${err}`)
           process.exit(1)
         }
-      } else if (!isProduction) {
-        logger?.warn('⚠️ Not in "production" mode, report will not be uploaded to the LeanIX workspace.')
       }
     }
   }

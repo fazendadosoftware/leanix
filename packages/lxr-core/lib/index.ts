@@ -1,14 +1,13 @@
-import fetch, { RequestInit } from 'node-fetch'
-import { parse as parseURL } from 'url'
+import fetch, { type RequestInit } from 'node-fetch'
+import { URL } from 'url'
 import { HttpsProxyAgent } from 'https-proxy-agent'
 import jwtDecode from 'jwt-decode'
 import FormData from 'form-data'
 import { c } from 'tar'
 import { resolve } from 'path'
 // import { readFile } from 'fs/promises'
-import { existsSync, writeFileSync, readdirSync, createReadStream, ReadStream, readFileSync } from 'fs'
-import { URL } from 'url'
-import { validate, ValidatorResult } from 'jsonschema'
+import { existsSync, writeFileSync, readdirSync, createReadStream, type ReadStream, readFileSync } from 'fs'
+import { validate, type ValidatorResult } from 'jsonschema'
 import LeanIXCredentialsSchema from './schema/LeanIXCredentials.json'
 import CustomReportMetadataSchema from './schema/CustomReportMetadata.json'
 import PackageJsonLXRSchema from './schema/PackageJsonLXR.json'
@@ -78,8 +77,8 @@ export interface PackageJsonLXR {
 const snakeToCamel = (s: string): string => s.replace(/([-_]\w)/g, g => g[1].toUpperCase())
 
 // utility function for validating "package.json", "lxr.json" and "lxreport.json" files
-export const validateDocument = async (document: any, name: 'lxr.json' | 'lxreport.json' | 'package.json'): Promise<ValidatorResult> => {
-  let schema: any
+export const validateDocument = async (document: unknown, name: 'lxr.json' | 'lxreport.json' | 'package.json'): Promise<ValidatorResult> => {
+  let schema: unknown
   switch (name) {
     case 'package.json':
       schema = PackageJsonLXRSchema
@@ -111,15 +110,7 @@ export const readLxrJson = async (path?: string): Promise<LeanIXCredentials> => 
   return credentials
 }
 
-export const readMetadataJson = async (path: string = `${process.cwd()}/package.json`): Promise<CustomReportMetadata> => {
-  // https://www.stefanjudis.com/snippets/how-to-import-json-files-in-es-modules-node-js/
-  /*
-  const pkg: PackageJsonLXR = JSON.parse(
-    await readFile(
-      new URL(path, import.meta.url)
-    ).then(buffer => buffer.toString())
-  )
-  */
+export const readMetadataJson = async (path = `${process.cwd()}/package.json`): Promise<CustomReportMetadata> => {
   const fileContent = readFileSync(path).toString()
   const pkg: PackageJsonLXR = JSON.parse(fileContent)
   await validateDocument(pkg, 'package.json')
@@ -129,7 +120,7 @@ export const readMetadataJson = async (path: string = `${process.cwd()}/package.
   return metadata
 }
 
-export const createProxyAgent = (proxyURL: string): HttpsProxyAgent => new HttpsProxyAgent(parseURL(proxyURL))
+export const createProxyAgent = (proxyURL: string): HttpsProxyAgent => new HttpsProxyAgent(new URL(proxyURL))
 
 export const getAccessToken = async (credentials: LeanIXCredentials): Promise<AccessToken> => {
   const uri = `https://${credentials.host}/services/mtm/v1/oauth2/token?grant_type=client_credentials`
@@ -172,7 +163,7 @@ export const createBundle = async (metadata: CustomReportMetadata, outDir: strin
   writeFileSync(resolve(outDir, metaFilename), JSON.stringify(metadata))
   await c({ gzip: true, cwd: outDir, file: targetFilePath, filter: path => path !== bundleFilename }, readdirSync(outDir))
 
-  const bundle = await createReadStream(targetFilePath)
+  const bundle = createReadStream(targetFilePath)
   return bundle
 }
 
@@ -186,16 +177,16 @@ type ResponseStatus = 'OK' | 'ERROR'
 interface ResponseData {
   status: ResponseStatus
   type: string
-  data?: any
+  data?: unknown
   errorMessage?: string
   errors?: ReportUploadError[]
 }
 
-interface ReportsResponseData extends ResponseData {
+type ReportsResponseData = {
   data: CustomReportMetadata[]
   total: number
   endCursor: string
-}
+} & ResponseData
 export interface ReportUploadResponseData {
   type: string
   status: ResponseStatus
@@ -218,7 +209,6 @@ export const uploadBundle = async (bundle: CustomReportProjectBundle, bearerToke
       const content = contentType === 'application/json'
         ? await res.json()
         : await res.text()
-      // if (content === null) throw Error(`status ${res.status}, unknown content type ${contentType ?? 'null'}`)
       if (!res.ok) throw Error(JSON.stringify({ status: res.status, message: content }))
       return content as ReportUploadResponseData
     })

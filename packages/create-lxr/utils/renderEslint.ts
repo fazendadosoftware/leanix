@@ -5,7 +5,8 @@ import type { Linter } from 'eslint'
 
 import createESLintConfig from '@vue/create-eslint-config'
 
-import { devDependencies as eslintDeps } from '../templates/vue/eslint/package.json' assert { type: 'json' }
+// import { devDependencies as eslintDeps } from '../templates/vue/eslint/package.json' assert { type: 'json' }
+import packageJson from '../templates/vue/eslint/package.json' assert { type: 'json' }
 import sortDependencies from './sortDependencies'
 import deepMerge from './deepMerge'
 
@@ -52,7 +53,7 @@ export default function renderEslint (
       }
     ]
 
-    additionalDependencies['eslint-plugin-cypress'] = eslintDeps['eslint-plugin-cypress']
+    additionalDependencies['eslint-plugin-cypress'] = packageJson.devDependencies['eslint-plugin-cypress']
   }
 
   const { pkg, files } = createESLintConfig({

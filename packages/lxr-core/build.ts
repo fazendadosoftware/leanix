@@ -1,4 +1,4 @@
-import { build, BuildOptions, Format } from 'esbuild'
+import { build, type BuildOptions, type Format } from 'esbuild'
 
 const getOptions = (format: Format, fileExtension: string): BuildOptions => ({
   entryPoints: ['lib/index.ts'],
