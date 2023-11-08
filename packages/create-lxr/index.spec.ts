@@ -1,6 +1,6 @@
 
 import { expect, test, beforeEach, afterAll } from 'vitest'
-import { execaCommandSync, ExecaSyncReturnValue, SyncOptions } from 'execa'
+import { execaCommandSync, type ExecaSyncReturnValue, type SyncOptions } from 'execa'
 import { mkdirpSync, readdirSync, writeFileSync, statSync } from 'fs-extra'
 import { rmSync, existsSync, readFileSync } from 'fs'
 import { join, resolve } from 'path'

@@ -61,7 +61,7 @@ test('getAccessToken returns a token', async () => {
   expect(accessToken.tokenType).toBe('bearer')
 })
 
-test.skip('getAccessToken with proxy returns a token', async () => {
+test('getAccessToken with proxy returns a token', async () => {
   const credentials = await readLxrJson(LXR_JSON_PATH)
   credentials.proxyURL = `http://127.0.0.1:${proxyPort}`
   const accessToken = await getAccessToken(credentials)
@@ -134,16 +134,16 @@ test('uploadBundle', async () => {
   if (!existsSync(outDir)) mkdirSync(outDir, { recursive: true })
   writeFileSync(resolve(outDir, 'index.html'), '<html><body>Hi from demo project</body></html>')
   writeFileSync(resolve(outDir, 'index.js'), 'console.log("hello world")')
-  const accessToken = await getAccessToken(credentials)
-  const reports = await fetchWorkspaceReports(accessToken.accessToken)
+  const { accessToken: bearerToken } = await getAccessToken(credentials)
+  const reports = await fetchWorkspaceReports(bearerToken)
   const hasTestReportInWorkspace = reports.find(({ reportId, version }) => reportId === metadata.id && version === metadata.version)
-  if (hasTestReportInWorkspace !== undefined) await deleteWorkspaceReportById(hasTestReportInWorkspace.id, accessToken.accessToken)
+  if (hasTestReportInWorkspace !== undefined) await deleteWorkspaceReportById(hasTestReportInWorkspace.id, bearerToken)
   const bundle = await createBundle(metadata, outDir)
-  const reportUploadResponseData = await uploadBundle(bundle, accessToken.accessToken)
+  const reportUploadResponseData = await uploadBundle({ bundle, bearerToken })
   expect(reportUploadResponseData.status).toBe('OK')
   expect(reportUploadResponseData.type).toBe('ReportUploadResponseData')
   expect(typeof reportUploadResponseData.data.id).toBe('string')
-  const status = await deleteWorkspaceReportById(reportUploadResponseData.data.id, accessToken.accessToken)
+  const status = await deleteWorkspaceReportById(reportUploadResponseData.data.id, bearerToken)
   expect(status).toBe(204)
   rmSync(outDir, { recursive: true })
-}, 10000)
+}, 60000)

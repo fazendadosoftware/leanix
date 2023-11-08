@@ -164,14 +164,22 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
       }
       if (bundle !== undefined && accessToken?.accessToken !== undefined && shouldUpload) {
         try {
-          const result = await uploadBundle(bundle, accessToken.accessToken, credentials.proxyURL)
+          const { accessToken: bearerToken } = accessToken
+          const { proxyURL, store } = credentials
+          const { id, version } = metadata
+          if (claims !== null) {
+            if (typeof store?.assetId === 'string') logger.info(`😅 Deploying asset id ${store.assetId} to ${store.host ?? 'store.leanix.net'}...`)
+            else logger.info(`😅 Uploading report ${id} with version "${version}" to workspace "${claims.principal.permission.workspaceName}"...`)
+          }
+
+          const result = await uploadBundle({ bundle, bearerToken, proxyURL, store })
           if (result.status === 'ERROR') {
             logger?.error('💥 Error while uploading project to workpace, check your "package.json" file...')
             logger?.error(JSON.stringify(result, null, 2))
             process.exit(1)
           }
-          const { id, version } = metadata
-          if (claims !== null) logger?.info(`🥳 Report "${id}" with version "${version}" was uploaded to workspace "${claims.principal.permission.workspaceName}"!`)
+          if (typeof store?.assetId === 'string') logger.info(`😅 Asset id ${store.assetId} has been deployed to ${store.host ?? 'store.leanix.net'}...`)
+          else if (claims !== null) logger?.info(`🥳 Report "${id}" with version "${version}" was uploaded to workspace "${claims.principal.permission.workspaceName}"!`)
         } catch (err: any) {
           logger?.error('💥 Error while uploading project to workpace...')
           // eslint-disable-next-line @typescript-eslint/restrict-template-expressions

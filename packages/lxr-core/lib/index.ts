@@ -32,6 +32,10 @@ export interface LeanIXCredentials {
   host: LeanIXHost
   apitoken: LeanIXApiToken
   proxyURL?: string
+  store?: {
+    host?: string
+    assetId: string
+  }
 }
 
 export interface AccessToken {
@@ -103,9 +107,10 @@ export const validateDocument = async (document: unknown, name: 'lxr.json' | 'lx
 
 export const readLxrJson = async (path?: string): Promise<LeanIXCredentials> => {
   if ((path ?? '').length === 0) path = `${process.cwd()}/lxr.json`
-  const { host, apitoken, proxyURL = null } = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
+  const { host, apitoken, proxyURL = null, store = null } = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
   const credentials: LeanIXCredentials = { host, apitoken }
   if (proxyURL !== null) credentials.proxyURL = proxyURL
+  if (store !== null) credentials.store = store
   await validateDocument(credentials, 'lxr.json')
   return credentials
 }
@@ -120,7 +125,7 @@ export const readMetadataJson = async (path = `${process.cwd()}/package.json`): 
   return metadata
 }
 
-export const createProxyAgent = (proxyURL: string): HttpsProxyAgent => new HttpsProxyAgent(new URL(proxyURL))
+export const createProxyAgent = (proxyURL: string): HttpsProxyAgent<string> => new HttpsProxyAgent(new URL(proxyURL))
 
 export const getAccessToken = async (credentials: LeanIXCredentials): Promise<AccessToken> => {
   const uri = `https://${credentials.host}/services/mtm/v1/oauth2/token?grant_type=client_credentials`
@@ -195,9 +200,22 @@ export interface ReportUploadResponseData {
   errors?: ReportUploadError[]
 }
 
-export const uploadBundle = async (bundle: CustomReportProjectBundle, bearerToken: BearerToken, proxyURL?: string): Promise<ReportUploadResponseData> => {
+export const uploadBundle = async (params: {
+  bundle: CustomReportProjectBundle
+  bearerToken: BearerToken
+  proxyURL?: string
+  store?: {
+    host?: string
+    assetId: string
+  }
+}): Promise<ReportUploadResponseData> => {
+  const { bundle, bearerToken, proxyURL, store } = params
+  const storeHost = store?.host ?? 'store.leanix.net'
+  const assetId = store?.assetId ?? null
   const decodedToken: JwtClaims = jwtDecode(bearerToken)
-  const url = `${decodedToken.instanceUrl}/services/pathfinder/v1/reports/upload`
+  const url = assetId !== null
+    ? `https://${storeHost}/services/torg/v1/assetversions/${assetId}/payload`
+    : `${decodedToken.instanceUrl}/services/pathfinder/v1/reports/upload`
   const headers = { Authorization: `Bearer ${bearerToken}` }
   const form = new FormData()
   form.append('file', bundle)
