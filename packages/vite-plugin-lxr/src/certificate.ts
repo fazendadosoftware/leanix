@@ -41,7 +41,7 @@ import 'node-forge/lib/pki'
 // this RFC in section 4.1.2.2 requires serial numbers to be positive
 // http://www.ietf.org/rfc/rfc5280.txt
 const toPositiveHex = (hexString: string): string => {
-  let mostSignificativeHexAsInt = parseInt(hexString[0], 16)
+  let mostSignificativeHexAsInt = Number.parseInt(hexString[0], 16)
   if (mostSignificativeHexAsInt < 8) {
     return hexString
   }
@@ -50,7 +50,7 @@ const toPositiveHex = (hexString: string): string => {
   return mostSignificativeHexAsInt.toString() + hexString.substring(1)
 }
 
-export function createCertificate (): string {
+export function createCertificate(): string {
   const days = 30
   const keySize = 2048
 
@@ -148,7 +148,6 @@ export function createCertificate (): string {
 
   cert.validity.notBefore = new Date()
   cert.validity.notAfter = new Date()
-  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
   cert.validity.notAfter.setDate(cert.validity.notBefore.getDate() + days)
 
   cert.setSubject(attrs)
@@ -164,6 +163,5 @@ export function createCertificate (): string {
   const privateKeyPem = forge.pki.privateKeyToPem(keyPair.privateKey)
   const certPem = forge.pki.certificateToPem(cert)
 
-  // eslint-disable-next-line @typescript-eslint/restrict-plus-operands
   return privateKeyPem + certPem
 }

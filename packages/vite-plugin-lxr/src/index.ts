@@ -1,22 +1,21 @@
+import type { AccessToken } from '@lxr/core/models/access-token'
+import type { CustomReportMetadata } from '@lxr/core/models/custom-report-metadata'
+import type { JwtClaims } from '@lxr/core/models/jwt-claims'
+import type { LeanIXCredentials } from '@lxr/core/models/leanix-credentials'
 import type { AddressInfo } from 'node:net'
 import type { Logger, Plugin, ResolvedConfig } from 'vite'
-import { promises as fsp } from 'node:fs'
+import type { ZodError } from 'zod'
+import { promises as fsp, openAsBlob } from 'node:fs'
 import { join } from 'node:path'
 import {
-  type AccessToken,
   createBundle,
-  type CustomReportMetadata,
-  type CustomReportProjectBundle,
   getAccessToken,
   getAccessTokenClaims,
   getLaunchUrl,
-  type JwtClaims,
-  type LeanIXCredentials,
   readLxrJson,
   readMetadataJson,
-  uploadBundle,
-  type ValidationError
-} from 'lxr-core'
+  uploadBundle
+} from '@lxr/core/index'
 import { resolveHostname } from './helpers'
 
 interface LeanIXPlugin extends Plugin {
@@ -84,7 +83,9 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
         config.base = ''
         config.server = { ...config.server ?? {}, https: https(), host: true }
         config.preview = { ...config.preview ?? {}, https: https() }
-        if (credentials.proxyURL !== undefined) { config.server.proxy = { '*': credentials.proxyURL } }
+        if (credentials.proxyURL !== undefined) {
+          config.server.proxy = { '*': credentials.proxyURL }
+        }
         try {
           credentials = await readLxrJson()
         }
@@ -109,10 +110,11 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
           }
           accessToken = await getAccessToken(credentials)
           claims = getAccessTokenClaims(accessToken)
-          if (claims !== null) { logger?.info(`🔥 Your workspace is ${claims.principal.permission.workspaceName}`) }
+          if (claims !== null) {
+            logger?.info(`🔥 Your workspace is ${claims.principal.permission.workspaceName}`)
+          }
         }
         catch (err) {
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           logger?.error(err === 401 ? '💥 Invalid LeanIX API token' : `${err}`)
           process.exit(1)
         }
@@ -120,7 +122,6 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
     },
     configureServer({ config: { server: { host, https = null } }, httpServer }) {
       if (httpServer !== null) {
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
         httpServer.on('listening', async () => {
           const { port } = httpServer.address() as AddressInfo
           const { name: hostname } = resolveHostname(host)
@@ -129,7 +130,6 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
           if (accessToken !== null) {
             launchUrl = getLaunchUrl(viteDevServerUrl, accessToken.accessToken)
             setTimeout(() => {
-              // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
               logger?.info(`🚀 Your development server is available here => ${launchUrl}`)
             }, 1)
           }
@@ -137,34 +137,27 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
         })
       }
     },
-    async writeBundle(options, outputBundle) {
+    async writeBundle(options, _outputBundle) {
       let metadata: CustomReportMetadata | undefined
       try {
         metadata = await readMetadataJson(pluginOptions?.packageJsonPath)
       }
       catch (err: any) {
-        const errors: ValidationError[] | undefined = err.errors
+        const errors: ZodError[] | undefined = err.errors
         if (err?.code === 'ENOENT') {
           const path: string = err.path
           logger?.error(`💥 Could not find metadata file at "${path}"`)
           logger?.warn('🙋 Have you initialized this project?"')
         }
         else if (Array.isArray(errors)) {
-          // logger?.error(`💥 Invalid metadata file "${metadataFilePath}"`)
-          errors.forEach((error) => {
-            const { schema, path, message } = error
-            const file = (schema === '/PackageJsonLXR' || path[0] === 'leanixReport')
-              ? 'package.json'
-              : 'lxreport.json'
-            const errPath = path.length > 0 ? ` property "${path.join('.')}" ` : ' '
-            logger?.error(`🥺 ${file}:${errPath}${message}`)
-          })
+          logger?.error(`💥 Invalid metadata: ${errors.toString()}`)
         }
         process.exit(1)
       }
-      let bundle: CustomReportProjectBundle | undefined
+      let bundle: Blob
       if (metadata !== undefined && options?.dir !== undefined) {
-        bundle = await createBundle(metadata, options?.dir)
+        const bundlePath = await createBundle(metadata, options?.dir)
+        bundle = await openAsBlob(bundlePath)
       }
       else {
         logger?.error('💥 Error while create project bundle file.')
@@ -176,7 +169,9 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
           const { proxyURL, store } = credentials
           const { id, version } = metadata
           if (claims !== null) {
-            if (typeof store?.assetId === 'string') { logger.info(`😅 Deploying asset id ${store.assetId} to ${store.host ?? 'store.leanix.net'}...`) }
+            if (typeof store?.assetId === 'string') {
+              logger.info(`😅 Deploying asset id ${store.assetId} to ${store.host ?? 'store.leanix.net'}...`)
+            }
             else { logger.info(`😅 Uploading report ${id} with version "${version}" to workspace "${claims.principal.permission.workspaceName}"...`) }
           }
 
@@ -186,12 +181,15 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
             logger?.error(JSON.stringify(result, null, 2))
             process.exit(1)
           }
-          if (typeof store?.assetId === 'string') { logger.info(`😅 Asset id ${store.assetId} has been deployed to ${store.host ?? 'store.leanix.net'}...`) }
-          else if (claims !== null) { logger?.info(`🥳 Report "${id}" with version "${version}" was uploaded to workspace "${claims.principal.permission.workspaceName}"!`) }
+          if (typeof store?.assetId === 'string') {
+            logger.info(`😅 Asset id ${store.assetId} has been deployed to ${store.host ?? 'store.leanix.net'}...`)
+          }
+          else if (claims !== null) {
+            logger?.info(`🥳 Report "${id}" with version "${version}" was uploaded to workspace "${claims.principal.permission.workspaceName}"!`)
+          }
         }
         catch (err: any) {
           logger?.error('💥 Error while uploading project to workpace...')
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           logger?.error(`💣 ${err}`)
           process.exit(1)
         }
