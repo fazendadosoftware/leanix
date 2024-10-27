@@ -75,7 +75,7 @@ export const getAccessToken = async (credentials: LeanIXCredentials): Promise<Ac
     'Authorization': `Basic ${Buffer.from(`apitoken:${credentials.apitoken}`).toString('base64')}`
   }
   const options: RequestInit = { method: 'post', headers }
-  if (credentials.proxyURL !== undefined) {
+  if (typeof credentials.proxyURL === 'string' && credentials.proxyURL.length > 0) {
     options.agent = createProxyAgent(credentials.proxyURL)
   }
   const accessToken: AccessToken = await fetch(uri, options)
@@ -151,7 +151,7 @@ export const uploadBundle = async (params: {
 
   form.append('file', bundle)
   const options: RequestInit = { method: 'post', headers, body: form }
-  if (proxyURL !== undefined) {
+  if (typeof proxyURL === 'string' && proxyURL.length > 0) {
     options.agent = createProxyAgent(proxyURL)
   }
   const reportResponseData: ReportUploadResponseData = await fetch(url, options)

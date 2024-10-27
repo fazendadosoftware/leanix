@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "data-uri-to-buffer": "^6.0.2",
+    "formdata-node": "^6.0.3",
     "https-proxy-agent": "^7.0.5",
     "jsonschema": "^1.4.1",
     "jwt-decode": "^4.0.0",

@@ -3,7 +3,7 @@ import type { CustomReportMetadata } from '@lxr/core/models/custom-report-metada
 import type { JwtClaims } from '@lxr/core/models/jwt-claims'
 import type { LeanIXCredentials } from '@lxr/core/models/leanix-credentials'
 import type { AddressInfo } from 'node:net'
-import type { Logger, Plugin, ResolvedConfig } from 'vite'
+import type { Logger, PluginOption, ResolvedConfig } from 'vite'
 import type { ZodError } from 'zod'
 import { promises as fsp, openAsBlob } from 'node:fs'
 import { join } from 'node:path'
@@ -18,12 +18,7 @@ import {
 } from '@lxr/core/index'
 import { resolveHostname } from './helpers'
 
-interface LeanIXPlugin extends Plugin {
-  devServerUrl: string | null
-  launchUrl: string | null
-}
-
-interface LeanIXPluginOptions {
+export interface LeanIXPluginOptions {
   packageJsonPath?: string
 }
 
@@ -54,7 +49,7 @@ export async function getCertificate(cacheDir: string): Promise<any> {
   }
 }
 
-const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
+const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): PluginOption => {
   let logger: Logger
   let accessToken: AccessToken | null = null
   let claims: JwtClaims | null = null
@@ -69,8 +64,7 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
   return {
     name: 'vite-plugin-lxr',
     enforce: 'post',
-    devServerUrl: null,
-    launchUrl: null,
+    apply: undefined,
     async config(config, env) {
       shouldUpload = env.mode === 'upload'
       loadWorkspaceCredentials = env.command === 'serve' || shouldUpload
@@ -105,7 +99,7 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
       logger = resolvedConfig.logger
       if (loadWorkspaceCredentials) {
         try {
-          if (typeof credentials.proxyURL === 'string') {
+          if (typeof credentials.proxyURL === 'string' && credentials.proxyURL.length > 0) {
             logger?.info(`👀 vite-plugin is using the following proxy: ${credentials.proxyURL}`)
           }
           accessToken = await getAccessToken(credentials)
@@ -174,7 +168,6 @@ const leanixPlugin = (pluginOptions?: LeanIXPluginOptions): LeanIXPlugin => {
             }
             else { logger.info(`😅 Uploading report ${id} with version "${version}" to workspace "${claims.principal.permission.workspaceName}"...`) }
           }
-
           const result = await uploadBundle({ bundle, bearerToken, proxyURL, store })
           if (result.status === 'ERROR') {
             logger?.error('💥 Error while uploading project to workpace, check your "package.json" file...')
