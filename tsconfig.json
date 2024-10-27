@@ -1,19 +1,18 @@
 {
   "compilerOptions": {
-    "target": "es2019",
-    "module": "ESNext",
-    "declaration": true,
-    "sourceMap": true,
+    "incremental": true,
     "composite": true,
+    "target": "ES6",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "module": "ES2022",
+    "moduleResolution": "Bundler",
     "strict": true,
-    "moduleResolution": "Node",
+    "declaration": true,
+    "declarationMap": true,
+    "removeComments": true,
+    "sourceMap": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  },
-  "exclude": [".git", "node_modules"],
-  "references": [
-    { "path": "./packages/lxr-core"}
-  ]
+    "skipLibCheck": true
+  }
 }

@@ -128,3 +128,5 @@ dist
 lxr.json
 
 .DS_Store
+
+test_results

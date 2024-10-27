@@ -9,8 +9,8 @@
     "@leanix/reporting": "^0.4.120"
   },
   "devDependencies": {
-    "vite-plugin-lxr": "^4.0.0",
-    "@vitejs/plugin-vue": "^4.0.0",
-    "vite": "^4.0.0"
+    "vite-plugin-lxr": "^5.0.0",
+    "@vitejs/plugin-vue": "^5.0.0",
+    "vite": "^5.0.0"
   }
 }
