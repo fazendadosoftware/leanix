@@ -1,18 +1,18 @@
 import { existsSync, readFileSync, rmSync } from 'node:fs'
 import { join, resolve } from 'node:path'
-import { execaCommandSync, type SyncOptions, type SyncResult } from 'execa'
+import { execaCommandSync, type ExecaSyncReturnValue, type SyncOptions } from 'execa'
 import { mkdirpSync, readdirSync, statSync, writeFileSync } from 'fs-extra'
 import { generate as uuid } from 'short-uuid'
 import pkg from '../package.json' with { type: 'json' }
 
 const CLI_PATH = resolve(__dirname, '..', pkg.bin)
 const projectName = 'test-app'
-const genPath = join(__dirname, projectName)
+const genPath = resolve(__dirname, projectName)
 
 const run = (
   args: string[],
   options: SyncOptions = {}
-): SyncResult => {
+): ExecaSyncReturnValue => {
   console.log(args.join(' '))
   return execaCommandSync(`node ${CLI_PATH} ${args.join(' ')}`, options)
 }
@@ -72,7 +72,7 @@ it('prompts for the framework on not supplying a value for --template', () => {
 
 it('prompts for the framework on supplying an invalid template', () => {
   const { stdout } = run([projectName, '--framework', 'unknown'])
-  expect((stdout as string)?.includes('"unknown" isn\'t a valid template. Please choose from below:')).toBe(true)
+  expect((stdout as string)?.includes('"unknown" isn\'t a valid framework. Please choose from below:')).toBe(true)
 })
 
 it('asks to overwrite non-empty target directory', () => {
@@ -89,6 +89,7 @@ it('asks to overwrite non-empty current directory', () => {
 
 it('successfully scaffolds a project based on vue starter template', async () => {
   const template = 'vue'
+  const variant = 'vue'
   const reportId = uuid()
   const author = uuid()
   const title = uuid()
@@ -98,8 +99,11 @@ it('successfully scaffolds a project based on vue starter template', async () =>
   const proxyURL = uuid()
 
   const args = [
-    '--template',
+    '--overwrite',
+    '--framework',
     template,
+    '--variant',
+    variant,
     '--id',
     reportId,
     '--author',
@@ -116,16 +120,17 @@ it('successfully scaffolds a project based on vue starter template', async () =>
     proxyURL
   ]
 
-  const { stdout, stderr } = run([projectName, ...args], { cwd: __dirname })
+  const { stdout, stderr } = run([projectName, ...args], { cwd: resolve(__dirname, '..') })
   expect(typeof stderr).toEqual('string')
 
-  const generatedFiles = getAllFiles(genPath).sort()
+  const targetPath = resolve(__dirname, '..', projectName)
+  const generatedFiles = getAllFiles(targetPath).sort()
 
   // Assertions
-  expect((stdout as string)?.includes(`Scaffolding project in ${genPath}`)).toBe(true)
+  expect((stdout as string)?.includes(`Scaffolding project in ${targetPath}`)).toBe(true)
   expect(generatedFiles).toEqual(templateFiles)
 
-  const pkg = getPackageJson(genPath)
+  const pkg = getPackageJson(targetPath)
   expect(pkg.name).toEqual(projectName)
   expect(pkg.author).toEqual(author)
   expect(pkg.description).toEqual(description)

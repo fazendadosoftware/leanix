@@ -22,7 +22,7 @@ export const generateLeanIXFiles = async (params: IAddLeanIXMetadataToPackageJso
   const version = pkg.version ?? '0.0.0'
   const pkgMetadataFields = { name, author, description, version }
   const leanixReport = { id, title, defaultConfig: {} }
-  pkg = { ...pkg, ...pkgMetadataFields, leanixReport }
+  pkg = { ...pkg, ...pkgMetadataFields, name, leanixReport }
   const lxreportJson = { ...leanixReport, ...pkgMetadataFields }
   await validateDocument(lxreportJson, 'lxreport.json')
   const lxrJson = { host, apitoken, proxyURL }

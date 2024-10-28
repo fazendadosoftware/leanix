@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { existsSync, mkdirSync } from 'node:fs'
 import { join, relative } from 'node:path'
+import { confirm, input } from '@inquirer/prompts'
 import { blue, cyan, green, red, yellow } from 'kolorist'
 import minimist from 'minimist'
 import prompts from 'prompts'
@@ -168,9 +169,8 @@ export const init = async (): Promise<void> => {
   let targetDir = argv?._?.[0] ?? null
   const defaultProjectName = targetDir ?? 'leanix-custom-report'
 
-  const forceOverwrite = (argv.overwrite) ?? false as boolean
   // leanix-specific answers
-  let { id, author, title, description, host, apitoken, proxyURL, framework = null, variant = null } = argv
+  let { id, author, title, description, host, apitoken, proxyURL, framework = null, variant = null, overwrite = false } = argv
 
   let result: IPromptResult = {}
   try {
@@ -185,7 +185,7 @@ export const init = async (): Promise<void> => {
         },
         {
           name: 'overwrite',
-          type: () => (canSkipEmptying(targetDir) ?? forceOverwrite ? null : 'confirm'),
+          type: () => canSkipEmptying(targetDir) || overwrite ? null : 'confirm',
           message: () => {
             const dirForPrompt = targetDir === '.' ? 'Current directory' : `Target directory "${targetDir}"`
             return `${dirForPrompt} is not empty. Remove existing files and continue?`
@@ -249,9 +249,6 @@ export const init = async (): Promise<void> => {
     return
   }
 
-  // user choice associated with prompts
-  const { overwrite } = result;
-
   // leanix-specific answers
   ({
     framework = framework,
@@ -262,7 +259,8 @@ export const init = async (): Promise<void> => {
     description = description,
     host = host,
     apitoken = apitoken,
-    proxyURL = proxyURL
+    proxyURL = proxyURL,
+    overwrite = overwrite
   } = result)
   const pkgInfo = pkgFromUserAgent(process.env.npm_config_user_agent) ?? null
   const pkgManager = (pkgInfo != null) ? pkgInfo.name : 'npm'
@@ -278,8 +276,8 @@ export const init = async (): Promise<void> => {
     mkdirSync(root)
   }
 
-  deployTemplate({ defaultProjectName, targetDir: root, result: { framework, variant, id, author, title, description, host, apitoken, proxyURL } })
-  await generateLeanIXFiles({ targetDir: root, result: { framework, variant, id, author, title, description, host, apitoken, proxyURL } })
+  deployTemplate({ defaultProjectName, targetDir: root, result: { framework, variant, id, author, title, description, host, apitoken, proxyURL, overwrite } })
+  await generateLeanIXFiles({ targetDir: root, result: { packageName: defaultProjectName, framework, variant, id, author, title, description, host, apitoken, proxyURL, overwrite } })
 
   console.log('\n🔥Done. Now run:\n')
   if (root !== cwd) {

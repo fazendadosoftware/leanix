@@ -3,7 +3,7 @@ import type { JwtClaims } from '@lxr/core/models/jwt-claims'
 import type { PathfinderReportUploadError, PathfinderResponseData, ResponseStatus } from '@lxr/core/models/pathfinder-response-data'
 import type { ZodObject } from 'zod'
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { resolve } from 'node:path'
+import { join, resolve } from 'node:path'
 import { URL } from 'node:url'
 import { type CustomReportMetadata, customReportMetadataSchema } from '@lxr/core/models/custom-report-metadata'
 import { type LeanIXCredentials, leanixCredentialsSchema } from '@lxr/core/models/leanix-credentials'
@@ -42,7 +42,7 @@ export const validateDocument = async (document: unknown, name: 'lxr.json' | 'lx
 
 export const readLxrJson = async (path?: string): Promise<LeanIXCredentials> => {
   if ((path ?? '').length === 0) {
-    path = `${process.cwd()}/lxr.json`
+    path = join(process.cwd(), 'lxr.json')
   }
   const { host, apitoken, proxyURL = null, store = null } = JSON.parse(path !== undefined ? readFileSync(path).toString() : '{}')
   const credentials: LeanIXCredentials = { host, apitoken }
@@ -56,7 +56,7 @@ export const readLxrJson = async (path?: string): Promise<LeanIXCredentials> => 
   return credentials
 }
 
-export const readMetadataJson = async (path = `${process.cwd()}/package.json`): Promise<CustomReportMetadata> => {
+export const readMetadataJson = async (path = join(process.cwd(), 'package.json')): Promise<CustomReportMetadata> => {
   const fileContent = readFileSync(path).toString()
   const pkg: PackageJsonLXR = JSON.parse(fileContent)
   await validateDocument(pkg, 'package.json')

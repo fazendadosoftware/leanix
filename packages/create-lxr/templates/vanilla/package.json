@@ -7,10 +7,12 @@
     "upload": "vite build --mode upload"
   },
   "dependencies": {
-    "@leanix/reporting": "^0.4.126"
+    "@leanix/reporting": "^0.4.144"
   },
   "devDependencies": {
-    "vite": "^5.0.0",
-    "vite-plugin-lxr": "^5.0.0"
+    "@antfu/eslint-config": "^3.8.0",
+    "eslint": "^9.13.0",
+    "vite": "^5.4.10",
+    "vite-plugin-lxr": "^5.0.15"
   }
 }

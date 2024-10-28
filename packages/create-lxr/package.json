@@ -1,7 +1,7 @@
 {
   "name": "create-lxr",
   "type": "module",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "author": "Paulo dos Santos",
   "license": "MIT",
   "homepage": "https://github.com/fazendadosoftware/leanix/tree/main/packages/create-lxr#readme",
@@ -26,11 +26,12 @@
     "update:versions": "node scripts/updateVersions.mjs"
   },
   "dependencies": {
+    "@inquirer/prompts": "^7.0.1",
     "@vue/create-eslint-config": "^0.5.0",
     "gradient-string": "^2.0.2",
     "kolorist": "^1.6.0",
-    "lxr-core": "*",
     "minimist": "^1.2.7",
+    "npm": "^10.9.0",
     "prompts": "^2.4.2",
     "short-uuid": "^4.2.2"
   },
