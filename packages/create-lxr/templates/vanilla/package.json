@@ -6,11 +6,11 @@
     "build": "vite build",
     "upload": "vite build --mode upload"
   },
+  "dependencies": {
+    "@leanix/reporting": "^0.4.126"
+  },
   "devDependencies": {
     "vite": "^5.0.0",
     "vite-plugin-lxr": "^5.0.0"
-  },
-  "dependencies": {
-    "@leanix/reporting": "^0.4.126"
   }
 }

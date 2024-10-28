@@ -23,6 +23,12 @@ const config: Config.InitialOptions = {
       displayName: 'vite-plugin-lxr',
       testPathIgnorePatterns: ['<rootDir>/node_modules/'],
       testMatch: ['<rootDir>/packages/vite-plugin-lxr/src/**/*.spec.ts']
+    },
+    {
+      displayName: 'create-lxr',
+      testPathIgnorePatterns: ['<rootDir>/node_modules/'],
+      testMatch: ['<rootDir>/packages/create-lxr/src/**/*.spec.ts'],
+      transformIgnorePatterns: []
     }
   ]
 }

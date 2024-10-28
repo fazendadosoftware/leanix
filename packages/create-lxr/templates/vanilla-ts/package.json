@@ -6,12 +6,12 @@
     "build": "tsc && vite build",
     "upload": "tsc && vite build --mode upload"
   },
+  "dependencies": {
+    "@leanix/reporting": "^0.4.144"
+  },
   "devDependencies": {
     "typescript": "^5.0.0",
     "vite": "^5.0.0",
     "vite-plugin-lxr": "^5.0.0"
-  },
-  "dependencies": {
-    "@leanix/reporting": "^0.4.126"
   }
 }

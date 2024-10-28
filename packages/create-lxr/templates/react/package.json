@@ -8,19 +8,19 @@
     "lint": "eslint src --ext js,jsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@leanix/reporting": "^0.4.126",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "@leanix/reporting": "^0.4.126"
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "@vitejs/plugin-react": "^4.0.0",
-    "vite": "^5.0.0",
-    "vite-plugin-lxr": "^5.0.0",
     "eslint": "^8.38.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "eslint-plugin-react-refresh": "^0.3.4"
+    "eslint-plugin-react-refresh": "^0.3.4",
+    "vite": "^5.0.0",
+    "vite-plugin-lxr": "^5.0.0"
   }
 }

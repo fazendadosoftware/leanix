@@ -6,6 +6,7 @@ export default defineConfig({
   format: ['cjs', 'esm'],
   clean: true,
   splitting: false,
+  dts: true,
   esbuildOptions: (options) => {
     options.footer = {
       // This will ensure we can continue writing this plugin
