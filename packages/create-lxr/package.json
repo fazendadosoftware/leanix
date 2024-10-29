@@ -1,22 +1,10 @@
 {
   "name": "create-lxr",
-  "version": "1.0.0",
-  "license": "MIT",
+  "type": "module",
+  "version": "1.1.3",
   "author": "Paulo dos Santos",
-  "bin": "dist/index.js",
-  "main": "dist/index.js",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "preinstall": "mkdir dist && [[ -f dist/index.js ]] || npx touch dist/index.js",
-    "clean": "rimraf dist",
-    "build": "npm run clean && npx ts-node -O \"{\\\"module\\\": \\\"commonjs\\\"}\" build.ts && shx cp -r ./templates/ ./dist && chmod -R 777 ./dist/",
-    "update:versions": "node scripts/updateVersions.mjs"
-  },
-  "engines": {
-    "node": ">=16.0.0"
-  },
+  "license": "MIT",
+  "homepage": "https://github.com/fazendadosoftware/leanix/tree/main/packages/create-lxr#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fazendadosoftware/leanix.git",
@@ -25,26 +13,37 @@
   "bugs": {
     "url": "https://github.com/fazendadosoftware/leanix/issues"
   },
-  "homepage": "https://github.com/fazendadosoftware/leanix/tree/main/packages/create-lxr#readme",
+  "main": "dist/index.cjs",
+  "bin": "dist/index.cjs",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "preinstall": "mkdir dist && [[ -f dist/index.js ]] || npx touch dist/index.js",
+    "clean": "rimraf dist",
+    "build": "tsup && shx cp -r ./templates/ ./dist && chmod -R 777 ./dist/",
+    "test": "jest",
+    "update:versions": "node scripts/updateVersions.mjs"
+  },
   "dependencies": {
-    "@vue/create-eslint-config": "^0.2.1",
+    "@inquirer/prompts": "^7.0.1",
+    "@vue/create-eslint-config": "^0.5.0",
     "gradient-string": "^2.0.2",
     "kolorist": "^1.6.0",
     "minimist": "^1.2.7",
+    "npm": "^10.9.0",
     "prompts": "^2.4.2",
-    "short-uuid": "^4.2.2",
-    "lxr-core": "*"
+    "short-uuid": "^4.2.2"
   },
   "devDependencies": {
-    "@types/eslint": "^8.4.10",
     "@types/fs-extra": "^9.0.13",
     "@types/gradient-string": "^1.1.2",
     "@types/minimist": "^1.2.2",
     "@types/prompts": "^2.4.1",
-    "execa": "^6.1.0",
+    "execa": "^8.0.0",
     "fs-extra": "^10.1.0",
     "package-json": "^7.0.0",
     "semver": "^7.3.7",
-    "touch": "^3.1.0"
+    "touch": "^3.1.1"
   }
 }

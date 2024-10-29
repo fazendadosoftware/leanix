@@ -1,15 +1,15 @@
 // @ts-check
 
+const fs = require('node:fs')
+const path = require('node:path')
 /**
  * modified from https://github.com/vuejs/vue-next/blob/master/scripts/release.js
  */
 const execa = require('execa')
-const path = require('path')
-const fs = require('fs')
 const args = require('minimist')(process.argv.slice(2))
-const semver = require('semver')
 const kleur = require('kleur')
 const prompts = require('prompts')
+const semver = require('semver')
 
 const pkgDir = process.cwd()
 const pkgPath = path.resolve(pkgDir, 'package.json')
@@ -44,7 +44,7 @@ const versionIncrements = [
 /**
  * @param {import('semver').ReleaseType} i
  */
-const inc = (i) => semver.inc(currentVersion, i, 'beta')
+const inc = i => semver.inc(currentVersion, i, 'beta')
 
 /**
  * @param {string} bin
@@ -67,9 +67,9 @@ const runIfNotDry = isDryRun ? dryRun : run
 /**
  * @param {string} msg
  */
-const step = (msg) => console.log(kleur.cyan(msg))
+const step = msg => console.log(kleur.cyan(msg))
 
-async function main () {
+async function main() {
   let targetVersion = args._[0]
 
   if (!targetVersion) {
@@ -82,9 +82,9 @@ async function main () {
       name: 'release',
       message: 'Select release type',
       choices: versionIncrements
-        .map((i) => `${i} (${inc(i)})`)
+        .map(i => `${i} (${inc(i)})`)
         .concat(['custom'])
-        .map((i) => ({ value: i, title: i }))
+        .map(i => ({ value: i, title: i }))
     })
 
     if (release === 'custom') {
@@ -98,7 +98,8 @@ async function main () {
         initial: currentVersion
       })
       targetVersion = res.version
-    } else {
+    }
+    else {
       targetVersion = release.match(/\((.*)\)/)[1]
     }
   }
@@ -107,8 +108,8 @@ async function main () {
     throw new Error(`invalid target version: ${targetVersion}`)
   }
 
-  const tag =
-    pkgName === 'vite' ? `v${targetVersion}` : `${pkgName}@${targetVersion}`
+  const tag
+    = pkgName === 'vite' ? `v${targetVersion}` : `${pkgName}@${targetVersion}`
 
   if (targetVersion.includes('beta') && !args.tag) {
     /**
@@ -120,7 +121,7 @@ async function main () {
       message: 'Publish under dist-tag "beta"?'
     })
 
-    if (tagBeta) args.tag = 'beta'
+    if (tagBeta) { args.tag = 'beta' }
   }
 
   /**
@@ -142,7 +143,8 @@ async function main () {
   step('\nBuilding package...')
   if (!skipBuild && !isDryRun) {
     await run('yarn', ['build'])
-  } else {
+  }
+  else {
     console.log('(skipped)')
   }
 
@@ -154,7 +156,8 @@ async function main () {
     step('\nCommitting changes...')
     await runIfNotDry('git', ['add', '-A'])
     await runIfNotDry('git', ['commit', '-m', `release: ${tag}`])
-  } else {
+  }
+  else {
     console.log('No changes to commit.')
   }
 
@@ -176,17 +179,17 @@ async function main () {
 /**
  * @param {string} version
  */
-function updateVersion (version) {
+function updateVersion(version) {
   const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
   pkg.version = version
-  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
+  fs.writeFileSync(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`)
 }
 
 /**
  * @param {string} version
  * @param {Function} runIfNotDry
  */
-async function publishPackage (version, runIfNotDry) {
+async function publishPackage(version, runIfNotDry) {
   const publicArgs = [
     'publish',
     '--no-git-tag-version',
@@ -203,10 +206,12 @@ async function publishPackage (version, runIfNotDry) {
       stdio: 'pipe'
     })
     console.log(kleur.green(`Successfully published ${pkgName}@${version}`))
-  } catch (e) {
+  }
+  catch (e) {
     if (e.stderr.match(/previously published/)) {
       console.log(kleur.red(`Skipping already published: ${pkgName}`))
-    } else {
+    }
+    else {
       throw e
     }
   }

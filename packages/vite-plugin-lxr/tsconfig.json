@@ -1,13 +1,7 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "rootDir": "lib",
-    "outDir": "dist",
-    "composite": false,
-    // https://stackoverflow.com/questions/61687679/nest-js-build-does-does-not-generate-the-dist-folder
-    "incremental": false,
-    "noEmit": false
+    "baseUrl": "./"
   },
-  "include": ["lib"],
-  "exclude": [ "**/*.spec.ts"]
+  "include": ["src/**/*", "package.json"]
 }
